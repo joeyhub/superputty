@@ -273,7 +273,7 @@ namespace SuperPutty.Data
             return o;
         }
 
-        public object Clone()
+        public virtual object Clone()
         {
             return this.PopulateClone(new SessionData());
         }
@@ -465,7 +465,7 @@ namespace SuperPutty.Data
             this.Children.ListChanged -= e;
         }
 
-        public new object Clone()
+        public override object Clone()
         {
             return this.PopulateClone(new SessionNode());
         }
@@ -475,7 +475,7 @@ namespace SuperPutty.Data
             SessionNode node = (SessionNode)this.Clone();
 
             foreach (SessionData child in this.Children)
-                node.AddChild((SessionData)child.Clone());
+                node.AddChild((SessionData)(child.Clone()));
 
             return node;
         }
@@ -535,7 +535,7 @@ namespace SuperPutty.Data
             }
         }
 
-        public new object Clone()
+        public override object Clone()
         {
             return this.PopulateClone(new SessionLeaf());
         }
