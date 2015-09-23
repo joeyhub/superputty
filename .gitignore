@@ -5,3 +5,4 @@ SuperPuttySetup/Release/*
 SuperPuttyUnitTests/bin/*
 SuperPuttyUnitTests/obj/*
 SuperPutty.v12.suo
+SuperPutty/SuperPutty.csproj.user

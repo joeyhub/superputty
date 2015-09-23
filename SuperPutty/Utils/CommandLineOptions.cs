@@ -124,8 +124,7 @@ namespace SuperPutty.Utils
                 }
             }
         }
-
-
+        
         public SessionDataStartInfo ToSessionStartInfo()
         {
             SessionDataStartInfo ssi = null;

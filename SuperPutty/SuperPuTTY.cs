@@ -40,7 +40,15 @@ namespace SuperPutty
         {
             Log.InfoFormat(
                 "Initializing.  Version={0}, UserSettings={1}, SettingsFolder={2}", 
-                Version, Settings.SettingsFilePath, Settings.SettingsFolder);           
+                Version, Settings.SettingsFilePath, Settings.SettingsFolder);
+
+            Log.InfoFormat("Loading all sessions.  file={0}", SessionsFileName);
+            sessions = new SessionCollection(SessionsFileName);
+            LoadSessions();
+            // Register IpcChanncel for single instance support
+            SingleInstanceHelper.RegisterRemotingService();
+            WindowEvents = new GlobalWindowEvents();
+            WorkaroundCygwinBug();
 
             if (!SuperPuTTY.IsFirstRun)
             {
@@ -94,14 +102,6 @@ namespace SuperPutty
                     }
                 }
             }
-
-            Log.InfoFormat("Loading all sessions.  file={0}", SessionsFileName);
-            sessions = new SessionCollection(SessionsFileName);
-            LoadSessions();
-            // Register IpcChanncel for single instance support
-            SingleInstanceHelper.RegisterRemotingService();
-            WindowEvents = new GlobalWindowEvents();
-            WorkaroundCygwinBug();
 
             Log.Info("Initialized");
         }

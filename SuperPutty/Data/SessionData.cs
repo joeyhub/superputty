@@ -215,7 +215,7 @@ namespace SuperPutty.Data
 
         public List<int> GetIds()
         {
-            SessionData current = this;
+            SessionData current = this.Parent;
             List<int> path = new List<int>();
 
             while (current != null)
@@ -224,6 +224,7 @@ namespace SuperPutty.Data
                 current = current.Parent;
             }
 
+            path.Reverse();
             return path;
         }
 
@@ -245,7 +246,6 @@ namespace SuperPutty.Data
             }
 
             path.Reverse();
-
             return path;
         }
 
@@ -418,9 +418,19 @@ namespace SuperPutty.Data
         public SessionLeaf GetByIds(ICollection<int> node_ids, int leaf_id)
         {
             SessionNode current = this;
+            bool first = true;
+
+            if (this.Id != node_ids.ElementAt<int>(0))
+                return null;
 
             foreach (int node_id in node_ids)
             {
+                if(first)
+                {
+                    first = false;
+                    continue;
+                }
+
                 current = current.GetById<SessionNode>(node_id);
 
                 if (current == null)
