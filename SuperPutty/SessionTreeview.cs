@@ -408,7 +408,7 @@ namespace SuperPutty
             TreeNode node = this.treeView1.SelectedNode;
             if (node != null && node is FolderTreeNode)
             {
-                List<SessionLeaf> sessions = ((SessionNode)node.Tag).Flatten<SessionLeaf>();
+                List<SessionLeaf> sessions = ((FolderTreeNode)node).FlattenTags<SessionLeaf>();
                 Log.InfoFormat("Found {0} sessions", sessions.Count);
 
                 if (sessions.Count > MaxSessionsToOpen)
@@ -840,6 +840,24 @@ namespace SuperPutty
             ~FolderTreeNode()
             {
                 ((SessionNode)this.Tag).OffChange(new ListChangedEventHandler(Sessions_ListChanged));
+            }
+
+            public List<T> FlattenTags<T>() where T : SessionData
+            {
+                List<T> children = new List<T>();
+
+                foreach (DataTreeNode node in this.Nodes)
+                {
+                    SessionData child = (SessionData)node.Tag;
+
+                    if (child is T)
+                        children.Add((T)child);
+
+                    if (node is FolderTreeNode)
+                        children.AddRange(((FolderTreeNode)node).FlattenTags<T>());
+                }
+
+                return children;
             }
 
             void Sessions_ListChanged(object sender, ListChangedEventArgs e)
