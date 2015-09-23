@@ -477,9 +477,9 @@ namespace SuperPutty
               TreeNode node = this.treeView1.SelectedNode;
               if (node != null)
               {
-                  this.treeView1.Hide();
+                  this.treeView1.Parent.Hide();
                   node.ExpandAll();
-                  this.treeView1.Show();
+                  this.treeView1.Parent.Show();
               }
         }
 
@@ -652,7 +652,7 @@ namespace SuperPutty
         private void ApplySearch(string txt)
         {
             Log.InfoFormat("Applying Search: txt={0}.", txt);
-            this.treeView1.Hide();
+            this.treeView1.Parent.Hide();
             this.treeView1.BeginUpdate();
 
             bool isClear = string.IsNullOrEmpty(txt);
@@ -673,7 +673,7 @@ namespace SuperPutty
 
 
             this.treeView1.EndUpdate();
-            this.treeView1.Show();
+            this.treeView1.Parent.Show();
         }
 
         public enum SearchMode
