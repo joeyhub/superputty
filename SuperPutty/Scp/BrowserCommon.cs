@@ -24,7 +24,7 @@ namespace SuperPutty.Scp
 
         IBrowserViewModel ViewModel { get; }
         BrowserFileInfo CurrentPath { get; }
-        SessionData Session { get; }
+        SessionLeaf Session { get; }
     }
     #endregion
     
@@ -47,7 +47,7 @@ namespace SuperPutty.Scp
     /// </summary>
     public interface IBrowserModel
     {
-        ListDirectoryResult ListDirectory(SessionData session, BrowserFileInfo path);
+        ListDirectoryResult ListDirectory(SessionLeaf session, BrowserFileInfo path);
     }
     #endregion
 

@@ -18,9 +18,9 @@ namespace SuperPutty.Utils
         private static readonly ILog Log = LogManager.GetLogger(typeof(MinttyStartInfo));
 
         public const string LocalHost = "localhost";
-        private SessionData session;
+        private SessionLeaf session;
 
-        public MinttyStartInfo(SessionData session)
+        public MinttyStartInfo(SessionLeaf session)
         {
             this.session = session;
 

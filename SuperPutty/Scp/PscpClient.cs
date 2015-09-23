@@ -78,7 +78,7 @@ namespace SuperPutty.Scp
         #endregion
 
 
-        public PscpClient(PscpOptions options, SessionData session) 
+        public PscpClient(PscpOptions options, SessionLeaf session) 
         {
             this.Options = options;
             this.Session = session;
@@ -153,7 +153,7 @@ namespace SuperPutty.Scp
             return path;
         }
 
-        public static string ToArgs(SessionData session, string password, string path)
+        public static string ToArgs(SessionLeaf session, string password, string path)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("-ls ");
@@ -219,7 +219,7 @@ namespace SuperPutty.Scp
             }
         }
 
-        static string ToArgs(SessionData session, string password, List<BrowserFileInfo> source, BrowserFileInfo target)
+        static string ToArgs(SessionLeaf session, string password, List<BrowserFileInfo> source, BrowserFileInfo target)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -485,7 +485,7 @@ namespace SuperPutty.Scp
         #endregion
 
         public PscpOptions Options { get; private set; }
-        public SessionData Session {get; private set; }
+        public SessionLeaf Session { get; private set; }
 
         #region AsyncStreamReader
         /// <summary>

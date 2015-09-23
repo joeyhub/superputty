@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -30,8 +31,9 @@ namespace SuperPutty
         public static event Action<String> StatusEvent;
 
         static BindingList<LayoutData> layouts = new BindingList<LayoutData>();
-        static SortedList<string, SessionData> sessionsMap = new SortedList<string, SessionData>();
-        static BindingList<SessionData> sessionsList = new BindingList<SessionData>();
+
+        public const string SESSIONS_FILE = "connections.xml";
+        private static SessionCollection sessions;
         static bool? isFirstRun;
 
         public static void Initialize(string[] args)
@@ -56,7 +58,6 @@ namespace SuperPutty
 
                 // load data
                 LoadLayouts();
-                LoadSessions();
                 Images = LoadImageList("default");
 
                 // determine starting layout, if any.  CLI has priority
@@ -77,7 +78,7 @@ namespace SuperPutty
                         if (sessionStartInfo != null)
                         {
                             StartingSession = sessionStartInfo;
-                            Log.InfoFormat("Starting adhoc Session from command line, {0}", StartingSession.Session.SessionId);
+                            Log.InfoFormat("Starting adhoc Session from command line, {0}", StartingSession.Session.GetFullPathToString());
                         }
                     }
 
@@ -94,9 +95,13 @@ namespace SuperPutty
                 }
             }
 
+            Log.InfoFormat("Loading all sessions.  file={0}", SessionsFileName);
+            sessions = new SessionCollection(SessionsFileName);
+            LoadSessions();
             // Register IpcChanncel for single instance support
             SingleInstanceHelper.RegisterRemotingService();
             WindowEvents = new GlobalWindowEvents();
+            WorkaroundCygwinBug();
 
             Log.Info("Initialized");
         }
@@ -261,10 +266,11 @@ namespace SuperPutty
             Process.Start(Assembly.GetExecutingAssembly().Location, "-layout \"" + layout.Name + "\"");
         }
 
-        public static void LoadSessionInNewInstance(string sessionId)
+        public static void LoadSessionInNewInstance(SessionLeaf session)
         {
-            ReportStatus("Starting session in new instance, {0}", sessionId);
-            Process.Start(Assembly.GetExecutingAssembly().Location, "-session \"" + sessionId + "\"");
+            string args = "-session \"" + session.GetIdString() + "\"";
+            ReportStatus("Starting session in new instance, {0} ({1})", args, session.Name);
+            Process.Start(Assembly.GetExecutingAssembly().Location, args);
         }
 
         public static void SetLayoutAsDefault(string layoutName)
@@ -293,39 +299,20 @@ namespace SuperPutty
         {
             get
             {
-                return Path.Combine(Settings.SettingsFolder, "Sessions.XML");
+                return Path.Combine(Settings.SettingsFolder, SuperPuTTY.SESSIONS_FILE);
             }
         }
 
         /// <summary>Load sessions database from file into the application</summary>
         public static void LoadSessions()
         {
-            string fileName = SessionsFileName;
-            Log.InfoFormat("Loading all sessions.  file={0}", fileName);
-
             try
             {
-                if (File.Exists(fileName))
-                {
-                    List<SessionData> sessions = SessionData.LoadSessionsFromFile(fileName);
-                    // remove old
-                    sessionsMap.Clear();
-                    sessionsList.Clear();
-
-                    foreach (SessionData session in sessions)
-                    {
-                        AddSession(session);
-                    }
-                }
-                else
-                {
-                    Log.WarnFormat("Sessions file does not exist, nothing loaded.  file={0}", fileName);
-                }
-
+                sessions.Reload();
             }
             catch (Exception ex)
             {
-                Log.Error("Error while loading sessions from " + fileName, ex);
+                Log.Error("Error while loading sessions from " + SessionsFileName, ex);
             }
         }
 
@@ -333,125 +320,37 @@ namespace SuperPutty
         public static void SaveSessions()
         {
             Log.InfoFormat("Saving all sessions");
-            SessionData.SaveSessionsToFile(GetAllSessions(), SessionsFileName);
-        }
-
-        /// <summary>
-        /// Remove a session from the in-application sessions database. 
-        /// </summary>
-        /// <param name="sessionId">The <seealso cref="SessionData.SessionID"/> of the session to remove</param>
-        /// <returns>true on success, or false on failure or if session did not exist</returns>
-        public static bool RemoveSession(string sessionId)
-        {
-            SessionData session = GetSessionById(sessionId);
-            if (session != null)
-            {
-                sessionsMap.Remove(sessionId);
-                sessionsList.Remove(session);
-                Log.InfoFormat("Removed Session, id={0}, success={1}", sessionId, session != null);
-                return true;
-            }            
-            return false;
-        }
-
-        /// <summary>Get a Session by its <seealso cref="SessionData.SessionID"/></summary>
-        /// <param name="sessionId">A string which represents a session</param>
-        /// <returns>A <seealso cref="SessionData"/> object containing the session details</returns>
-        public static SessionData GetSessionById(string sessionId)
-        {
-            SessionData session = null;
-            if (sessionId != null)
-            {
-                if (!sessionsMap.TryGetValue(sessionId, out session))
-                {
-                    // no hit by id...so try the list
-                    // @TODO: Revisit...this is a work around the sessionId changing in tree
-                    foreach (SessionData sd in sessionsList)
-                    {
-                        if (sd.SessionId == sessionId)
-                        {
-                            session = sd;
-                            // reindex list
-                            sessionsMap.Clear();
-                            foreach (SessionData s in sessionsList)
-                            {
-                                sessionsMap[s.SessionId] = s;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            return session;
-        }
-
-        /// <summary>Add a new session to the in-application session database</summary>
-        /// <param name="session">A <seealso cref="SessionData"/> object containing the configuration of a session</param>
-        /// <returns>true on success, false on failure</returns>
-        public static bool AddSession(SessionData session)
-        {
-            bool success = false;
-            if (GetSessionById(session.SessionId) == null)
-            {
-                Log.InfoFormat("Added Session, id={0}", session.SessionId);
-                sessionsMap.Add(session.SessionId, session);
-                sessionsList.Add(session);
-                success = true;
-            }
-            else
-            {
-                Log.InfoFormat("Failed to Add Session, id={0}.  Session already exists", session.SessionId);
-            }
-            return success;
-        }
-
-        /// <summary>Get a list of all sessions from the in-application database</summary>
-        /// <returns>A <seealso cref="List"/> of <seealso cref="SessionData"/> objects</returns>
-        public static List<SessionData> GetAllSessions()
-        {
-            return sessionsMap.Values.ToList();
-        }
-
-        /// <summary>Retrieve a <seealso cref="SessionData"/> object and open a new putty window</summary>
-        /// <param name="sessionId">A string containing the <seealso cref="SessionData.SessionID"/> of the session</param>
-        public static void OpenPuttySession(string sessionId)
-        {
-            OpenPuttySession(GetSessionById(sessionId));
+            sessions.Save();
         }
 
         /// <summary>Open a new putty window with its settings being passed in a <seealso cref="SessionData"/> object</summary>
         /// <param name="session">The <seealso cref="SessionData"/> object containing the settings</param>
-        public static void OpenPuttySession(SessionData session)
+        public static void OpenPuttySession(SessionLeaf session)
         {
-            Log.InfoFormat("Opening putty session, id={0}", session == null ? "" : session.SessionId);
+            Log.InfoFormat("Opening putty session, id={0}", session == null ? "" : session.GetFullPathToString());
             if (session != null)
             {
                 ctlPuttyPanel sessionPanel = ctlPuttyPanel.NewPanel(session);
                 ApplyDockRestrictions(sessionPanel);
                 ApplyIconForWindow(sessionPanel, session);
                 sessionPanel.Show(MainForm.DockPanel, session.LastDockstate);
-                SuperPuTTY.ReportStatus("Opened session: {0} [{1}]", session.SessionId, session.Proto);
+                SuperPuTTY.ReportStatus("Opened session: {0} [{1}]", session.GetFullPathToString(), session.Proto);
             }
-        }
-
-        /// <summary>Retrieve a <seealso cref="SessionData"/> object and open a new putty scp window</summary>
-        /// <param name="sessionId">A string containing the <seealso cref="SessionData.SessionID"/> of the session</param>
-        public static void OpenScpSession(string sessionId)
-        {
-            OpenScpSession(GetSessionById(sessionId));
         }
 
         /// <summary>Open a new putty scp window with its settings being passed in a <seealso cref="SessionData"/> object</summary>
         /// <param name="session">The <seealso cref="SessionData"/> object containing the settings</param>
-        public static void OpenScpSession(SessionData session)
+        public static void OpenScpSession(SessionLeaf session)
         {
-            Log.InfoFormat("Opening scp session, id={0}", session == null ? "" : session.SessionId);
+            string path = session == null ? "" : session.GetFullPathToString();
             if (!IsScpEnabled)
             {
-                SuperPuTTY.ReportStatus("Could not open session, pscp not found: {0} [SCP]", session.SessionId);
+                SuperPuTTY.ReportStatus("Could not open session, pscp not enabled, {0}.", path);
             }
             else if (session != null)
             {
+                
+                Log.InfoFormat("Opening scp session, id={0}", path);
                 PscpBrowserPanel panel = new PscpBrowserPanel(
                     session, new PscpOptions { PscpLocation = Settings.PscpExe, PscpHomePrefix = Settings.PscpHomePrefix }, 
                     Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
@@ -459,7 +358,7 @@ namespace SuperPutty
                 ApplyIconForWindow(panel, session);
                 panel.Show(MainForm.DockPanel, session.LastDockstate);
 
-                SuperPuTTY.ReportStatus("Opened session: {0} [SCP]", session.SessionId);
+                SuperPuTTY.ReportStatus("Opened session: {0} [SCP]", path);
             }
             else
             {
@@ -516,6 +415,32 @@ namespace SuperPutty
             }
         }
 
+        static void WorkaroundCygwinBug()
+        {
+            try
+            {
+                // work around known bug with cygwin
+                Dictionary<string, string> envVars = new Dictionary<string, string>();
+                foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
+                {
+                    string envVar = (string)de.Key;
+                    if (envVars.ContainsKey(envVar.ToUpper()))
+                    {
+                        // duplicate found... (e.g. TMP and tmp)
+                        Log.DebugFormat("Clearing duplicate envVariable, {0}", envVar);
+                        Environment.SetEnvironmentVariable(envVar, null);
+                        continue;
+                    }
+                    envVars.Add(envVar.ToUpper(), envVar);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.WarnFormat("Error working around cygwin issue: {0}", ex.Message);
+            }
+        }
+
         /// <summary>Import sessions from the specified file into the in-application database</summary>
         /// <param name="fileName">A string containing the path of the filename that holds session configuration</param>
         public static void ImportSessionsFromFile(string fileName)
@@ -524,8 +449,9 @@ namespace SuperPutty
             if (File.Exists(fileName))
             {
                 Log.InfoFormat("Importing sessions from file, path={0}", fileName);
-                List<SessionData> sessions = SessionData.LoadSessionsFromFile(fileName);
-                ImportSessions(sessions, "Imported");
+                SessionNode sessions = SessionStorage.LoadSessionsFromFile(fileName);
+                sessions.Name = "Imported";
+                Sessions.Import(sessions);
             }
         }
 
@@ -533,77 +459,28 @@ namespace SuperPutty
         public static void ImportSessionsFromPuTTY()
         {
             Log.InfoFormat("Importing sessions from PuTTY/KiTTY");
-            List<SessionData> sessions = PuttyDataHelper.GetAllSessionsFromPuTTY();
-            ImportSessions(sessions, "ImportedFromPuTTY");
+            Sessions.Import(PuttyDataHelper.GetAllSessionsFromPuTTY());
         }
 
         /// <summary>Import sessions from Windows Registry which were set by PuttYCM and load them into the in-application sessions database</summary>
         public static void ImportSessionsFromPuttyCM(string fileExport)
         {
             Log.InfoFormat("Importing sessions from PuttyCM");
-            List<SessionData> sessions = PuttyDataHelper.GetAllSessionsFromPuTTYCM(fileExport);
-            ImportSessions(sessions, "ImportedFromPuTTYCM");
-        }
-
-        /// <summary>Import sessions from a from a <seealso cref="List"/> object into the specified folder</summary>
-        /// <param name="sessions">A <seealso cref="List"/> of <seealso cref="SessionData"/> objects</param>
-        /// <param name="folder">The destination folder name</param>
-        public static void ImportSessions(List<SessionData> sessions, string folder)
-        {
-            foreach (SessionData session in sessions)
-            {
-                // pre-pend session id with the provided folder to put them
-                session.SessionId = MakeUniqueSessionId(SessionData.CombineSessionIds(folder, session.SessionId));
-                session.SessionName = SessionData.GetSessionNameFromId(session.SessionId);
-                AddSession(session);
-            }
-            Log.InfoFormat("Imported {0} sessions into {1}", sessions.Count, folder);
-
-            SaveSessions();
+            Sessions.Import(PuttyDataHelper.GetAllSessionsFromPuTTYCM(fileExport));
         }
 
         /// <summary>Import sessions from older version of SuperPuTTY from the Windows Registry</summary>
         public static void ImportSessionsFromSuperPutty1030()
         {
-            try
-            {
-                List<SessionData> sessions = SessionData.LoadSessionsFromRegistry();
-                if (sessions != null && sessions.Count > 0)
-                {
-                    foreach (SessionData session in sessions)
-                    {
-                        AddSession(session);
-                    }
-                    SaveSessions();
-
-                    Log.InfoFormat("Imported {0} old sessions from registry.", sessions.Count);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.WarnFormat("Could not import old sessions, msg={0}", ex.Message);
-            }
+            Log.InfoFormat("Importing sessions from SuperPutty1030");
+            Sessions.Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1030());
         }
 
-        /// <summary>Generate a unique session ID to prevent collisions in the in-application data store, used when importing and merging sessions from
-        /// another application or an older versin of SuperPuTTY</summary>
-        /// <param name="sessionId">A string containing the sessionID of the session being imported</param>
-        /// <returns>A string containing a unique sessionID</returns>
-        public static string MakeUniqueSessionId(string sessionId)
+        /// <summary>Import sessions from older version of SuperPuTTY from the Windows Registry</summary>
+        public static void ImportSessionsFromSuperPutty1040(string fileExport)
         {
-            String newSessionId = sessionId;
-
-            for (int i = 1; i < 1000; i++)
-            {
-                SessionData sessionExisting = GetSessionById(newSessionId);
-                if (sessionExisting == null)
-                {
-                    break;
-                }                
-                newSessionId = String.Format("{0}-{1}", sessionId, i);
-            }
-
-            return newSessionId;
+            Log.InfoFormat("Importing sessions from SuperPutty1040");
+            Sessions.Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1040(fileExport));
         }
 
         #endregion
@@ -656,7 +533,7 @@ namespace SuperPutty
         /// <summary>Get the Icon defined for the specified session</summary>
         /// <param name="session">The session configuration data</param>
         /// <returns>The Icon configured for the session</returns>
-        public static Icon GetIconForSession(SessionData session)
+        public static Icon GetIconForSession(SessionLeaf session)
         {
             Icon icon = null;
             if (session != null)
@@ -680,7 +557,7 @@ namespace SuperPutty
             return icon;
         }
 
-        private static void ApplyIconForWindow(ToolWindow win, SessionData session)
+        private static void ApplyIconForWindow(ToolWindow win, SessionLeaf session)
         {
             win.Icon = GetIconForSession(session);
         }
@@ -721,8 +598,8 @@ namespace SuperPutty
         public static LayoutData CurrentLayout { get; private set; }
         public static LayoutData StartingLayout { get; private set; }
         public static SessionDataStartInfo StartingSession { get; private set; }
+        public static SessionCollection Sessions { get { return sessions; } }
         public static BindingList<LayoutData> Layouts { get { return layouts; } }
-        public static BindingList<SessionData> Sessions { get { return sessionsList; } }
         public static CommandLineOptions CommandLine { get; private set; }
         public static ImageList Images { get; private set; }
         public static GlobalWindowEvents WindowEvents { get; private set; }

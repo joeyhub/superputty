@@ -23,7 +23,7 @@ namespace SuperPutty.Scp
         /// <param name="session"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public ListDirectoryResult ListDirectory(SessionData session, BrowserFileInfo path)
+        public ListDirectoryResult ListDirectory(SessionLeaf session, BrowserFileInfo path)
         {
             ListDirectoryResult result;
 

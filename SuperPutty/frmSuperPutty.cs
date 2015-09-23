@@ -105,7 +105,7 @@ namespace SuperPutty
             this.toolStripStatusLabelVersion.Text = SuperPuTTY.Version;
 
             // tool windows
-            this.sessions = new SingletonToolWindowHelper<SessionTreeview>("Sessions", this.DockPanel, x => new SessionTreeview(x.DockPanel));
+            this.sessions = new SingletonToolWindowHelper<SessionTreeview>("Sessions", this.DockPanel);
             this.layouts = new SingletonToolWindowHelper<LayoutsList>("Layouts", this.DockPanel);
             this.logViewer = new SingletonToolWindowHelper<Log4netLogViewer>("Log Viewer", this.DockPanel);
 
@@ -302,11 +302,11 @@ namespace SuperPutty
         {
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Filter = "XML Files|*.xml|All files|*.*";
-            saveDialog.FileName = "Sessions.XML";
+            saveDialog.FileName = SuperPuTTY.SESSIONS_FILE;
             saveDialog.InitialDirectory = Application.StartupPath;
             if (saveDialog.ShowDialog(this) == DialogResult.OK)
             {
-                SessionData.SaveSessionsToFile(SuperPuTTY.GetAllSessions(), saveDialog.FileName);
+                SessionStorage.SaveSessionsToFile(SuperPuTTY.Sessions.root, saveDialog.FileName);
             }
         }
 
@@ -314,7 +314,7 @@ namespace SuperPutty
         {
             OpenFileDialog openDialog = new OpenFileDialog();
             openDialog.Filter = "XML Files|*.xml|All files|*.*";
-            openDialog.FileName = "Sessions.XML";
+            openDialog.FileName = SuperPuTTY.SESSIONS_FILE;
             openDialog.CheckFileExists = true;
             openDialog.InitialDirectory = Application.StartupPath;
             if (openDialog.ShowDialog(this) == DialogResult.OK)
@@ -323,6 +323,30 @@ namespace SuperPutty
             }
         }
 
+        private void fromSuperPutty1030ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult res = MessageBox.Show(
+                "Do you want to copy all sessions from SuperPutty 1.3?",
+                "SuperPuTTY",
+                MessageBoxButtons.YesNo);
+            if (res == DialogResult.Yes)
+            {
+                SuperPuTTY.ImportSessionsFromSuperPutty1030();
+            }
+        }
+
+        private void fromSuperPutty1040ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Filter = "XML Files|*.xml|All files|*.*";
+            openDialog.FileName = "Sessions.XML";
+            openDialog.CheckFileExists = true;
+            openDialog.InitialDirectory = SuperPuTTY.Settings.SettingsFolder;
+            if (openDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                SuperPuTTY.ImportSessionsFromSuperPutty1040(openDialog.FileName);
+            }
+        }
 
         private void fromPuTTYCMExportToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -336,12 +360,11 @@ namespace SuperPutty
                 SuperPuTTY.ImportSessionsFromPuttyCM(openDialog.FileName);
             }
         }
-
-
+        
         private void fromPuTTYSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult res = MessageBox.Show(
-                "Do you want to copy all sessions from PuTTY/KiTTY?  Duplicates may be created.",
+                "Do you want to copy all sessions from PuTTY/KiTTY?",
                 "SuperPuTTY",
                 MessageBoxButtons.YesNo);
             if (res == DialogResult.Yes)
@@ -356,13 +379,13 @@ namespace SuperPutty
             QuickSelectorData data = new QuickSelectorData();
             data.CaseSensitive = SuperPuTTY.Settings.QuickSelectorCaseSensitiveSearch;
 
-            foreach (SessionData sd in SuperPuTTY.Sessions)
+            foreach (SessionLeaf sd in SuperPuTTY.Sessions.root.Flatten<SessionLeaf>())
             {
                 data.ItemData.AddItemDataRow(
-                    sd.SessionName,
-                    sd.SessionId,
+                    sd.Name,
+                    sd.GetFullPathToString(),
                     sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black,
-                    null);
+                    sd);
             }
 
             QuickSelectorOptions opt = new QuickSelectorOptions();
@@ -372,7 +395,7 @@ namespace SuperPutty
             QuickSelector d = new QuickSelector();
             if (d.ShowDialog(this, data, opt) == DialogResult.OK)
             {
-                SuperPuTTY.OpenPuttySession(d.SelectedItem.Detail);
+                SuperPuTTY.OpenPuttySession((SessionLeaf)d.SelectedItem.Tag);
             }
         }
 
@@ -387,10 +410,10 @@ namespace SuperPutty
                 ctlPuttyPanel panel = content as ctlPuttyPanel;
                 if (content != null)
                 {
-                    SessionData sd = panel.Session;
+                    SessionLeaf sd = panel.Session;
                     data.ItemData.AddItemDataRow(
                         panel.Text,
-                        sd.SessionId,
+                        sd.GetFullPathToString(),
                         sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black,
                         panel);
                 }
@@ -411,7 +434,7 @@ namespace SuperPutty
 
         private void editSessionsInNotepadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(XmlEditor ?? "notepad", Path.Combine(SuperPuTTY.Settings.SettingsFolder, "Sessions.XML"));
+            Process.Start(XmlEditor ?? "notepad", Path.Combine(SuperPuTTY.Settings.SettingsFolder, SuperPuTTY.SESSIONS_FILE));
         }
 
         private void reloadSessionsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -909,11 +932,10 @@ namespace SuperPutty
                 ConnectionProtocol proto = isScp
                     ? ConnectionProtocol.SSH
                     : connStr.Protocol.GetValueOrDefault((ConnectionProtocol)Enum.Parse(typeof(ConnectionProtocol), protoString));
-                SessionData session = new SessionData
+                SessionLeaf session = new SessionLeaf
                 {
                     Host = connStr.Host,
-                    SessionName = connStr.Host,
-                    SessionId = SuperPuTTY.MakeUniqueSessionId(SessionData.CombineSessionIds("ConnectBar", connStr.Host)),
+                    Name = connStr.Host,
                     Proto = proto,
                     Port = connStr.Port.GetValueOrDefault(dlgEditSession.GetDefaultPort(proto)),
                     Username = this.tbTxtBoxLogin.Text,
@@ -1070,7 +1092,7 @@ namespace SuperPutty
                     if (puttyPanel != null && this.sendCommandsDocumentSelector.IsDocumentSelected(puttyPanel))
                     {
                         int handle = puttyPanel.AppPanel.AppWindowHandle.ToInt32();
-                        Log.InfoFormat("SendCommand: session={0}, command=[{1}], handle={2}", puttyPanel.Session.SessionId, command, handle);
+                        Log.InfoFormat("SendCommand: session={0}, command=[{1}], handle={2}", puttyPanel.Session.GetFullPathToString(), command, handle);
 
                         command.SendToTerminal(handle);
                         /*
@@ -1551,6 +1573,7 @@ namespace SuperPutty
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.DefaultDesktopOnly) == System.Windows.Forms.DialogResult.Yes)
                         {
+
                             Process.Start(latest.release_url);
                         }
                     }

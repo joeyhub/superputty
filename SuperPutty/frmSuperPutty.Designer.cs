@@ -122,6 +122,8 @@
             this.notifyIconContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exitSuperPuTTYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fromSuperPutty1030ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fromSuperPutty1040ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -172,7 +174,9 @@
             this.importSettingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fromFileToolStripMenuItem,
             this.fromPuTTYSettingsToolStripMenuItem,
-            this.fromPuTTYCMExportToolStripMenuItem});
+            this.fromPuTTYCMExportToolStripMenuItem,
+            this.fromSuperPutty1030ToolStripMenuItem,
+            this.fromSuperPutty1040ToolStripMenuItem});
             this.importSettingsToolStripMenuItem.Name = "importSettingsToolStripMenuItem";
             this.importSettingsToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
             this.importSettingsToolStripMenuItem.Text = "&Import Sessions";
@@ -823,6 +827,20 @@
             this.checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
             this.checkForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdatesToolStripMenuItem_Click);
             // 
+            // fromSuperPutty1030ToolStripMenuItem
+            // 
+            this.fromSuperPutty1030ToolStripMenuItem.Name = "fromSuperPutty1030ToolStripMenuItem";
+            this.fromSuperPutty1030ToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.fromSuperPutty1030ToolStripMenuItem.Text = "From SuperPutty 1.3";
+            this.fromSuperPutty1030ToolStripMenuItem.Click += new System.EventHandler(this.fromSuperPutty1030ToolStripMenuItem_Click);
+            // 
+            // fromSuperPutty1040ToolStripMenuItem
+            // 
+            this.fromSuperPutty1040ToolStripMenuItem.Name = "fromSuperPutty1040ToolStripMenuItem";
+            this.fromSuperPutty1040ToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.fromSuperPutty1040ToolStripMenuItem.Text = "From SuperPutty 1.4";
+            this.fromSuperPutty1040ToolStripMenuItem.Click += new System.EventHandler(this.fromSuperPutty1040ToolStripMenuItem_Click);
+            // 
             // frmSuperPutty
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -936,6 +954,8 @@
         private System.Windows.Forms.ToolStripMenuItem showMenuBarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cleanUpStrayProcessesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdatesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fromSuperPutty1030ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fromSuperPutty1040ToolStripMenuItem;
     }
 }
 

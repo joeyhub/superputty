@@ -69,7 +69,7 @@ namespace SuperPutty
             textBoxUsername.Text = this.Username;
         }
 
-        public dlgLogin(SessionData session) : this(session.Username)
+        public dlgLogin(SessionLeaf session) : this(session.Username)
         {
             m_Session = session;
         }

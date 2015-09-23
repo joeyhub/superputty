@@ -22,14 +22,14 @@ namespace SuperPutty.Scp
             InitializeComponent();
         }
 
-        public PscpBrowserPanel(SessionData session, PscpOptions options) :
+        public PscpBrowserPanel(SessionLeaf session, PscpOptions options) :
             this(session, options, Environment.GetFolderPath(Environment.SpecialFolder.Desktop))
         { }
 
-        public PscpBrowserPanel(SessionData session, PscpOptions options, string localStartingDir) : this()
+        public PscpBrowserPanel(SessionLeaf session, PscpOptions options, string localStartingDir) : this()
         {
-            this.Name = session.SessionName;
-            this.TabText = session.SessionName;
+            this.Name = session.Name;
+            this.TabText = session.Name;
 
             this.fileTransferPresenter = new FileTransferPresenter(options);
             this.localBrowserPresenter = new BrowserPresenter(

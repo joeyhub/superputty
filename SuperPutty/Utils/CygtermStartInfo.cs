@@ -17,9 +17,9 @@ namespace SuperPutty.Utils
         private static readonly ILog Log = LogManager.GetLogger(typeof(CygtermStartInfo));
 
         public const string LocalHost = "localhost";
-        private SessionData session;
+        private SessionLeaf session;
 
-        public CygtermStartInfo(SessionData session)
+        public CygtermStartInfo(SessionLeaf session)
         {
             this.session = session;
 

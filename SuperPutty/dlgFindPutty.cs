@@ -412,12 +412,6 @@ namespace SuperPutty
                 Application.Exit();
                 System.Environment.Exit(1);
             }
-
-            if (SuperPuTTY.IsFirstRun && SuperPuTTY.Sessions.Count == 0)
-            {
-                // first run, got nothing...try to import from registry
-                SuperPuTTY.ImportSessionsFromSuperPutty1030();
-            }
         }
 
         private void buttonBrowseLayoutsFolder_Click(object sender, EventArgs e)

@@ -100,7 +100,7 @@ namespace SuperPuttyUnitTests.Scp
         public void TestGUI()
         {
             BrowserPresenter presenter = new BrowserPresenter(
-                "Local", new LocalBrowserModel(), new SessionData(), new MockFileTransferPresenter());
+                "Local", new LocalBrowserModel(), new SessionLeaf(), new MockFileTransferPresenter());
 
             string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             BrowserView view = new BrowserView(presenter, new BrowserFileInfo(new DirectoryInfo(dir)));

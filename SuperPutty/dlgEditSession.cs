@@ -41,30 +41,28 @@ namespace SuperPutty
 
         public delegate bool SessionNameValidationHandler(string name, out string error);
 
-        private SessionData Session;
+        public SessionLeaf Session {get;private set;}
         private String OldHostname;
         private bool isInitialized = false;
         private ImageListPopup imgPopup = null;
 
-        public dlgEditSession(SessionData session, ImageList iconList)
+        public dlgEditSession(SessionLeaf session, ImageList iconList)
         {
-            Session = session;
             InitializeComponent();
 
             // get putty saved settings from the registry to populate
             // the dropdown
             PopulatePuttySettings();
 
-            if (!String.IsNullOrEmpty(Session.SessionName))
+            if (session != null)
             {
-                this.Text = "Edit session: " + session.SessionName;
-                this.textBoxSessionName.Text = Session.SessionName;
-                this.textBoxHostname.Text = Session.Host;
-                this.textBoxPort.Text = Session.Port.ToString();
-                this.textBoxExtraArgs.Text = Session.ExtraArgs;
-                this.textBoxUsername.Text = Session.Username;
+                this.textBoxSessionName.Text = session.Name;
+                this.textBoxHostname.Text = session.Host;
+                this.textBoxPort.Text = session.Port.ToString();
+                this.textBoxExtraArgs.Text = session.ExtraArgs;
+                this.textBoxUsername.Text = session.Username;
 
-                switch (Session.Proto)
+                switch (session.Proto)
                 {
                     case ConnectionProtocol.Raw:
                         radioButtonRaw.Checked = true;
@@ -104,12 +102,13 @@ namespace SuperPutty
             }
             else
             {
-                this.Text = "Create new session";
+                session = new SessionLeaf();
                 radioButtonSSH.Checked = true;
                 this.buttonSave.Enabled = false;
             }
 
 
+            this.Session = session;
             // Setup icon chooser
             this.buttonImageSelect.ImageList = iconList;
             this.buttonImageSelect.ImageKey = string.IsNullOrEmpty(Session.ImageKey)
@@ -143,13 +142,12 @@ namespace SuperPutty
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            Session.SessionName = textBoxSessionName.Text.Trim();
+            Session.Name = textBoxSessionName.Text.Trim();
             Session.PuttySession = comboBoxPuttyProfile.Text.Trim();
             Session.Host = textBoxHostname.Text.Trim();
             Session.ExtraArgs = textBoxExtraArgs.Text.Trim();
             Session.Port = int.Parse(textBoxPort.Text.Trim());
             Session.Username = textBoxUsername.Text.Trim();
-            Session.SessionId = SessionData.CombineSessionIds(SessionData.GetSessionParentId(Session.SessionId), Session.SessionName);
             Session.ImageKey = buttonImageSelect.ImageKey;
 
             for (int i = 0; i < groupBox1.Controls.Count; i++)
@@ -238,8 +236,6 @@ namespace SuperPutty
                 this.textBoxPort.Text = "22";
             }
         }
-
-
 
         public static int GetDefaultPort(ConnectionProtocol protocol)
         {

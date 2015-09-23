@@ -164,7 +164,7 @@ namespace SuperPutty
              */
 
         private dlgLogin m_Login;
-        private SessionData m_Session;
+        private SessionLeaf m_Session;
 
         private PuttyClosedCallback m_PuttyClosed;
 
@@ -175,7 +175,7 @@ namespace SuperPutty
             set { m_PuttyClosed = value; }
         }
 
-        public PscpTransfer(SessionData session)
+        public PscpTransfer(SessionLeaf session)
         {
             m_Session = session;
             m_Login = new dlgLogin(m_Session);
@@ -425,7 +425,7 @@ namespace SuperPutty
             }
         }
         
-        static string MakeArgs(SessionData session, bool includePassword, string path)
+        static string MakeArgs(SessionLeaf session, bool includePassword, string path)
         {
             string args = "-ls "; // default arguments
             args += (!String.IsNullOrEmpty(session.PuttySession)) ? "-load \"" + session.PuttySession + "\" " : "";

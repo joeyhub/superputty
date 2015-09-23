@@ -180,7 +180,7 @@ namespace SuperPutty.Scp
         {
             this.SourceFiles = new List<BrowserFileInfo>();
         }
-        public SessionData Session { get; set; }
+        public SessionLeaf Session { get; set; }
         public List<BrowserFileInfo> SourceFiles { get; set; }
         public BrowserFileInfo TargetFile { get; set; }
     } 

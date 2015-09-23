@@ -187,7 +187,7 @@ namespace SuperPuttyUnitTests.Scp
         [Test, Category("NetworkTest")]
         public void ListDirSuccess()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName, 
                 Password = ScpConfig.Password, 
@@ -212,7 +212,7 @@ namespace SuperPuttyUnitTests.Scp
         [Test, Category("NetworkTest")]
         public void ListDirBadPassword()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password + "xxx",
@@ -233,7 +233,7 @@ namespace SuperPuttyUnitTests.Scp
         [Test]
         public void ListDirHostNoKey()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password,
@@ -254,7 +254,7 @@ namespace SuperPuttyUnitTests.Scp
         [Test, Category("NetworkTest")]
         public void ListDirBadPath()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password,
@@ -286,7 +286,7 @@ namespace SuperPuttyUnitTests.Scp
         [Test, Category("Netowk Tests")]
         public void LocalToRemote()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password,

@@ -622,6 +622,7 @@ namespace SuperPutty.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("/home/")]
         public string PscpHomePrefix {
@@ -634,14 +635,40 @@ namespace SuperPutty.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public global::SuperPutty.Properties.Setting.OpenWithDictionary OpenSessionWith {
+            get {
+                return ((global::SuperPutty.Properties.Setting.OpenWithDictionary)(this["OpenSessionWith"]));
+            }
+            set {
+                this["OpenSessionWith"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoUpdateCheck {
             get {
                 return ((bool)(this["AutoUpdateCheck"]));
             }
             set {
                 this["AutoUpdateCheck"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoIncrementPrefixTabs {
+            get {
+                return ((bool)(this["AutoIncrementPrefixTabs"]));
+            }
+            set {
+                this["AutoIncrementPrefixTabs"] = value;
             }
         }
     }

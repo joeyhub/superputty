@@ -71,7 +71,7 @@ namespace SuperPuttyUnitTests.Scp
 
             MockFileTransferPresenter presenter = new MockFileTransferPresenter();
             presenter.ViewModel.FileTransfers.Add(
-                new FileTransferViewItem("Running", "Source", "Target")
+                new FileTransferViewItem(new SessionLeaf("Running"), "Source", "Target")
                 {
                     Progress = 50,
                     Start = DateTime.Now,
@@ -79,7 +79,7 @@ namespace SuperPuttyUnitTests.Scp
                     Status = FileTransfer.Status.Running
                 });
             presenter.ViewModel.FileTransfers.Add(
-                new FileTransferViewItem("Done", "Source", "Target")
+                new FileTransferViewItem(new SessionLeaf("Done"), "Source", "Target")
                 {
                     Progress = 100,
                     Start = DateTime.Now,
@@ -87,7 +87,7 @@ namespace SuperPuttyUnitTests.Scp
                     Status = FileTransfer.Status.Complete
                 });
             presenter.ViewModel.FileTransfers.Add(
-                new FileTransferViewItem("Done", "Source", "Target")
+                new FileTransferViewItem(new SessionLeaf("Done"), "Source", "Target")
                 {
                     Progress = 10,
                     Start = DateTime.Now,
@@ -129,10 +129,9 @@ namespace SuperPuttyUnitTests.Scp
         {
             Form form = new Form();
 
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
-                SessionId = "Test/SessionId",
-                SessionName = "Test SessionName",
+                Name = "Test SessionName",
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password, 
                 Host = ScpConfig.KnownHost, 
@@ -169,10 +168,9 @@ namespace SuperPuttyUnitTests.Scp
         [TestView]
         public void RunPscpBrowserPanel()
         {
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
-                SessionId = "Test/SessionId",
-                SessionName = "Test SessionName",
+                Name = "Test SessionName",
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password,
                 Host = ScpConfig.KnownHost,

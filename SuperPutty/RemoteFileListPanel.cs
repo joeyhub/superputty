@@ -39,26 +39,26 @@ namespace SuperPutty
 
         private DockPanel m_DockPanel;
         private PscpTransfer m_Transfer;
-        private SessionData m_Session;
+        private SessionLeaf m_Session;
         private string m_Path = ".";
         private dlgMouseFeedback m_MouseFollower;
-        public RemoteFileListPanel(PscpTransfer transfer, DockPanel dockPanel, SessionData session)
+        public RemoteFileListPanel(PscpTransfer transfer, DockPanel dockPanel, SessionLeaf session)
         {
-            Log.InfoFormat("Started new File Transfer Session for {0}", session.SessionName);
+            Log.InfoFormat("Started new File Transfer Session for {0}", session.Name);
             m_Session = session;
             m_DockPanel = dockPanel;
             m_Transfer = transfer;
             m_MouseFollower = new dlgMouseFeedback();
             InitializeComponent();
             
-            this.TabText = session.SessionName;
+            this.TabText = session.Name;
 
             LoadDirectory(m_Path);
         }
 
         private bool LoadDirectory(string path)
         {
-            Log.InfoFormat("Request directory listing for '{0}/{1}'", m_Session.SessionName, path);
+            Log.InfoFormat("Request directory listing for '{0}/{1}'", m_Session.Name, path);
             DirListingCallback dirCallback = delegate(RequestResult result, List<FileEntry> files)
             {
                 switch (result)
@@ -273,7 +273,7 @@ namespace SuperPutty
             }
             //Logger.Log("Total Bytes: {0} Total Files: {1}", totalBytes, fileCount);
             frmTransferStatus frmStatus = new frmTransferStatus();
-            frmStatus.Text = "Uploading files to " + m_Session.SessionName;
+            frmStatus.Text = "Uploading files to " + m_Session.Name;
             frmStatus.Show(m_DockPanel, DockState.DockBottom);
 
             TransferUpdateCallback callback = delegate(bool fileComplete, bool cancelTransfer, FileTransferStatus status)

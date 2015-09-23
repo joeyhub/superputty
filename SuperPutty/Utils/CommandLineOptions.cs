@@ -131,19 +131,25 @@ namespace SuperPutty.Utils
             SessionDataStartInfo ssi = null;
             if (this.SessionId != null)
             {
-                // first try to resolve by sessionId
-                SessionData session = SuperPuTTY.GetSessionById(this.SessionId);
-                if (session == null)
+                if (SessionData.IsStringIdValid(this.SessionId))
                 {
-                    Log.WarnFormat("Session from command line not found, id={0}", this.SessionId);
+                    SessionLeaf session = SuperPuTTY.Sessions.root.GetByStringId(this.SessionId);
+                    if (session == null)
+                    {
+                        Log.WarnFormat("Session from command line not found, id={0}", this.SessionId);
+                    }
+                    else
+                    {
+                        ssi = new SessionDataStartInfo
+                        {
+                            Session = session,
+                            UseScp = this.UseScp
+                        };
+                    }
                 }
                 else
                 {
-                    ssi = new SessionDataStartInfo 
-                    { 
-                        Session = session, 
-                        UseScp = this.UseScp 
-                    };
+                    Log.WarnFormat("Invalid session format, id={0}", this.SessionId);
                 }
             }
             else if (this.Host != null ||  this.PuttySession != null)
@@ -166,11 +172,10 @@ namespace SuperPutty.Utils
                 }
 
                 ssi = new SessionDataStartInfo();
-                ssi.Session = new SessionData
+                ssi.Session = new SessionLeaf
                 {
                     Host = this.Host,
-                    SessionName = sessionName,
-                    SessionId = SuperPuTTY.MakeUniqueSessionId(SessionData.CombineSessionIds("CLI", this.Host)),
+                    Name = sessionName,
                     Port = this.Port.GetValueOrDefault(22),
                     Proto = this.Protocol.GetValueOrDefault(ConnectionProtocol.SSH),
                     Username = this.UserName,

@@ -9,6 +9,9 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Threading;
 using System.Globalization;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Schema;
 
 namespace SuperPutty.Properties {
     
@@ -125,6 +128,56 @@ namespace SuperPutty.Properties {
                 {
                     this[name] = Keys.None;
                     Log.WarnFormat("Could not update shortcut for " + name + ".  Setting to None.", ex);
+                }
+            }
+        }
+    }
+
+    namespace Setting {
+        public class OpenWith
+        {
+            public string Process { get; set; }
+            public string Args { get; set; }
+
+            public OpenWith(string process, string args)
+            {
+                this.Process = process;
+                this.Args = args;
+            }
+        }
+
+        public class OpenWithDictionary : Dictionary<string, OpenWith>, IXmlSerializable
+        {
+            public XmlSchema GetSchema()
+            {
+                return null;
+            }
+
+            public void ReadXml(XmlReader reader)
+            {
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.EndElement && reader.LocalName.Equals("OpenWithDictionary"))
+                        break;
+
+                    // Warning: This might be null.
+                    string name = reader["Name"];
+                    this[name] = new OpenWith(reader["Process"], reader["Args"]);
+                }
+            }
+
+            public void WriteXml(XmlWriter writer)
+            {
+                foreach (string key in Keys)
+                {
+                    writer.WriteStartElement("Entry");
+                    writer.WriteAttributeString("Name", key);
+
+                    OpenWith setting = this[key];
+                    writer.WriteAttributeString("Process", setting.Process);
+                    writer.WriteAttributeString("Args", setting.Args);
+
+                    writer.WriteEndElement();
                 }
             }
         }

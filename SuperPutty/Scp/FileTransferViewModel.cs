@@ -56,7 +56,7 @@ namespace SuperPutty.Scp
         {
         }
 
-        public FileTransferViewItem(string session, string source, string target)
+        public FileTransferViewItem(SessionLeaf session, string source, string target)
             : this()
         {
             this.Session = session;
@@ -68,14 +68,14 @@ namespace SuperPutty.Scp
             : this()
         {
             this.Id = transfer.Id;
-            this.Session = transfer.Request.Session.SessionId;
+            this.Session = transfer.Request.Session;
             this.Source = ToString(transfer.Request.SourceFiles);
             this.Target = transfer.Request.TargetFile.Path;
             this.Start = DateTime.Now;
         }
 
         public int Id { get; private set; }
-        public string Session { get; private set; }
+        public SessionLeaf Session { get; private set; }
         public string Source { get; private set; }
         public string Target { get; private set; }
 

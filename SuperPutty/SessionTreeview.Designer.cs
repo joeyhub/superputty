@@ -33,6 +33,8 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.contextMenuStripAddTreeItem = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.newSessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createLikeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,6 +62,7 @@
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
+            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripAddTreeItem.SuspendLayout();
             this.contextMenuStripFolder.SuspendLayout();
             this.panelSearch.SuspendLayout();
@@ -82,6 +85,7 @@
             this.treeView1.Size = new System.Drawing.Size(430, 478);
             this.treeView1.TabIndex = 0;
             this.treeView1.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeView1_ItemDrag);
+            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             this.treeView1.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseClick);
             this.treeView1.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseDoubleClick);
             this.treeView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeView1_DragDrop);
@@ -98,6 +102,8 @@
             // contextMenuStripAddTreeItem
             // 
             this.contextMenuStripAddTreeItem.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem4,
+            this.toolStripSeparator4,
             this.newSessionToolStripMenuItem,
             this.createLikeToolStripMenuItem,
             this.settingsToolStripMenuItem,
@@ -110,8 +116,20 @@
             this.fileBrowserToolStripMenuItem});
             this.contextMenuStripAddTreeItem.Name = "contextMenuStripAddTreeItem";
             this.contextMenuStripAddTreeItem.ShowImageMargin = false;
-            this.contextMenuStripAddTreeItem.Size = new System.Drawing.Size(182, 192);
+            this.contextMenuStripAddTreeItem.Size = new System.Drawing.Size(182, 220);
             this.contextMenuStripAddTreeItem.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripAddTreeItem_Opening);
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(181, 22);
+            this.toolStripMenuItem4.Text = "Open With";
+            this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(178, 6);
             // 
             // newSessionToolStripMenuItem
             // 
@@ -185,6 +203,7 @@
             this.newSessionToolStripMenuItem1,
             this.toolStripSeparator3,
             this.newFolderToolStripMenuItem,
+            this.copyFolderToolStripMenuItem,
             this.removeFolderToolStripMenuItem,
             this.toolStripMenuItem1,
             this.renameToolStripMenuItem,
@@ -195,7 +214,7 @@
             this.collapseAllToolStripMenuItem});
             this.contextMenuStripFolder.Name = "contextMenuStripAddTreeItem";
             this.contextMenuStripFolder.ShowImageMargin = false;
-            this.contextMenuStripFolder.Size = new System.Drawing.Size(129, 182);
+            this.contextMenuStripFolder.Size = new System.Drawing.Size(129, 226);
             this.contextMenuStripFolder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripFolder_Opening);
             // 
             // newSessionToolStripMenuItem1
@@ -325,6 +344,13 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
+            // copyFolderToolStripMenuItem
+            // 
+            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
+            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
+            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
+            // 
             // SessionTreeview
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -339,6 +365,7 @@
             this.ShowIcon = false;
             this.TabText = "Sessions";
             this.Text = "PuTTY Sessions";
+            this.Load += new System.EventHandler(this.SessionTreeview_Load);
             this.contextMenuStripAddTreeItem.ResumeLayout(false);
             this.contextMenuStripFolder.ResumeLayout(false);
             this.panelSearch.ResumeLayout(false);
@@ -379,5 +406,8 @@
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
     }
 }

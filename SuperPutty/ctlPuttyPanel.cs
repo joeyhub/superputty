@@ -49,23 +49,29 @@ namespace SuperPutty
 
         private static int RefocusAttempts = Convert.ToInt32(ConfigurationManager.AppSettings["SuperPuTTY.RefocusAttempts"] ?? "5");
         private static int RefocusIntervalMs = Convert.ToInt32(ConfigurationManager.AppSettings["SuperPuTTY.RefocusIntervalMs"] ?? "80");
+        private static Int64 Count = 0;
 
         private PuttyStartInfo m_puttyStartInfo;
         private ApplicationPanel m_AppPanel;
-        private SessionData m_Session;
+        private SessionLeaf m_Session;
         private PuttyClosedCallback m_ApplicationExit;
 
-        public ctlPuttyPanel(SessionData session, PuttyClosedCallback callback)
+        public ctlPuttyPanel(SessionLeaf session, PuttyClosedCallback callback)
         {
             m_Session = session;
             m_ApplicationExit = callback;
             m_puttyStartInfo = new PuttyStartInfo(session);
 
             InitializeComponent();
+            this.Id = ctlPuttyPanel.Count++;
+            this.Text = session.Name;
 
-            this.Text = session.SessionName;
-            this.TabText = session.SessionName;
-            this.TextOverride = session.SessionName;
+            if (SuperPuTTY.Settings.AutoIncrementPrefixTabs)
+                this.TextOverride = Convert.ToString(this.Id, 16).ToUpper() + " " + this.Text;
+            else
+                this.TextOverride = this.Text;
+
+            this.TabText = this.TextOverride;
 
             CreatePanel();
             AdjustMenu();
@@ -104,7 +110,7 @@ namespace SuperPutty
             this.m_AppPanel.ApplicationParameters = this.m_puttyStartInfo.Args;
             this.m_AppPanel.ApplicationWorkingDirectory = this.m_puttyStartInfo.WorkingDir;
             this.m_AppPanel.Location = new System.Drawing.Point(0, 0);
-            this.m_AppPanel.Name = this.m_Session.SessionId; // "applicationControl1";
+            this.m_AppPanel.Name = this.m_Session.GetFullPathToString();
             this.m_AppPanel.Size = new System.Drawing.Size(this.Width, this.Height);
             this.m_AppPanel.TabIndex = 0;            
             this.m_AppPanel.m_CloseCallback = this.m_ApplicationExit;
@@ -129,45 +135,37 @@ namespace SuperPutty
             }
         }
 
+        void CreateNewMenu(ToolStripMenuItem parent, SessionNode session)
+        {
+            foreach (SessionData child in session.GetChildren())
+            {
+                if(child is SessionNode)
+                {
+                    ToolStripMenuItem newSessionFolder = new ToolStripMenuItem();
+                    newSessionFolder.Name = child.Name;
+                    parent.DropDownItems.Add(newSessionFolder);
+                    this.CreateNewMenu(newSessionFolder, (SessionNode)child);
+                }
+                else if(child is SessionLeaf)
+                {
+                    ToolStripMenuItem newSessionTSMI = new ToolStripMenuItem();
+                    newSessionTSMI.Tag = child;
+                    newSessionTSMI.Text = child.Name;
+                    newSessionTSMI.Click += new System.EventHandler(newSessionTSMI_Click);
+                    newSessionTSMI.ToolTipText = session.ToString();
+                    parent.DropDownItems.Add(newSessionTSMI);
+                }
+            }
+        }
+
         void CreateMenu()
         {
             this.newSessionToolStripMenuItem.Enabled = SuperPuTTY.Settings.PuttyPanelShowNewSessionMenu;
             if (SuperPuTTY.Settings.PuttyPanelShowNewSessionMenu)
             {
                 this.contextMenuStrip1.SuspendLayout();
-
                 // BBB: do i need to dispose each one?
-                newSessionToolStripMenuItem.DropDownItems.Clear();
-                foreach (SessionData session in SuperPuTTY.GetAllSessions())
-                {
-                    ToolStripMenuItem tsmiParent = newSessionToolStripMenuItem;
-                    foreach (string part in SessionData.GetSessionNameParts(session.SessionId))
-                    {
-                        if (part == session.SessionName)
-                        {
-                            ToolStripMenuItem newSessionTSMI = new ToolStripMenuItem();
-                            newSessionTSMI.Tag = session;
-                            newSessionTSMI.Text = session.SessionName;
-                            newSessionTSMI.Click += new System.EventHandler(newSessionTSMI_Click);
-                            newSessionTSMI.ToolTipText = session.ToString();
-                            tsmiParent.DropDownItems.Add(newSessionTSMI);
-                        }
-                        else
-                        {
-                            if (tsmiParent.DropDownItems.ContainsKey(part))
-                            {
-                                tsmiParent = (ToolStripMenuItem)tsmiParent.DropDownItems[part];
-                            }
-                            else
-                            {
-                                ToolStripMenuItem newSessionFolder = new ToolStripMenuItem(part);
-                                newSessionFolder.Name = part;
-                                tsmiParent.DropDownItems.Add(newSessionFolder);
-                                tsmiParent = newSessionFolder;
-                            }
-                        }
-                    }
-                }
+                this.CreateNewMenu(newSessionToolStripMenuItem, SuperPuTTY.Sessions.root);
                 this.contextMenuStrip1.ResumeLayout();
             }
 
@@ -297,10 +295,20 @@ namespace SuperPutty
         protected override string GetPersistString()
         {
             string str = String.Format("{0}?SessionId={1}&TabName={2}", 
-                this.GetType().FullName, 
-                HttpUtility.UrlEncodeUnicode(this.m_Session.SessionId), 
+                this.GetType().FullName,
+                HttpUtility.UrlEncodeUnicode(this.m_Session.GetIdString()),
                 HttpUtility.UrlEncodeUnicode(this.TextOverride));
             return str;
+        }
+
+        private static SessionLeaf FindBestSession(string sessionId)
+        {
+            // Warning: It is possible that a really short legacy id might be a new id but highly unlikely.
+            if (SessionData.IsStringIdValid(sessionId))
+                return SuperPuTTY.Sessions.root.GetByStringId(sessionId);
+
+            // Warning: No validity check on sessionId for legacy.
+            return SuperPuTTY.Sessions.root.GetByLegacyId(sessionId);
         }
 
         public static ctlPuttyPanel FromPersistString(String persistString)
@@ -317,7 +325,8 @@ namespace SuperPutty
 
                     Log.InfoFormat("Restoring putty session, sessionId={0}, tabName={1}", sessionId, tabName);
 
-                    SessionData session = SuperPuTTY.GetSessionById(sessionId);
+                    SessionLeaf session = FindBestSession(sessionId);
+
                     if (session != null)
                     {
                         panel = ctlPuttyPanel.NewPanel(session);
@@ -328,8 +337,9 @@ namespace SuperPutty
                         else
                         {
                             panel.Icon = SuperPuTTY.GetIconForSession(session);
+                            panel.Id = ctlPuttyPanel.Count++;
                             panel.Text = tabName;
-                            panel.TextOverride = tabName;
+                            panel.TextOverride = Convert.ToString(panel.Id, 16).ToUpper() + " " + panel.Text;
                         }
                     }
                     else
@@ -344,7 +354,8 @@ namespace SuperPutty
                     {
                         string sessionId = persistString.Substring(idx + 1);
                         Log.InfoFormat("Restoring putty session, sessionId={0}", sessionId);
-                        SessionData session = SuperPuTTY.GetSessionById(sessionId);
+                        SessionLeaf session = FindBestSession(sessionId);
+
                         if (session != null)
                         {
                             panel = ctlPuttyPanel.NewPanel(session);
@@ -374,7 +385,7 @@ namespace SuperPutty
         {
             dlgRenameItem dialog = new dlgRenameItem();
             dialog.ItemName = this.Text;
-            dialog.DetailName = this.m_Session.SessionId;
+            dialog.DetailName = this.m_Session.GetFullPathToString();
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
@@ -391,12 +402,12 @@ namespace SuperPutty
             }
         }
 
-        public SessionData Session { get { return this.m_Session; } }
+        public SessionLeaf Session { get { return this.m_Session; } }
         public ApplicationPanel AppPanel { get { return this.m_AppPanel; } }
         public ctlPuttyPanel previousPanel { get; set; }
         public ctlPuttyPanel nextPanel { get; set; }
 
-        public static ctlPuttyPanel NewPanel(SessionData sessionData)
+        public static ctlPuttyPanel NewPanel(SessionLeaf sessionData)
         {
             ctlPuttyPanel puttyPanel = null;
             // This is the callback fired when the panel containing the terminal is closed
@@ -412,7 +423,6 @@ namespace SuperPutty
                     {
                         sessionData.LastDockstate = puttyPanel.DockState;
                         SuperPuTTY.SaveSessions();
-                        //sessionData.SaveToRegistry();
                     }
 
                     if (puttyPanel.InvokeRequired)
@@ -440,7 +450,7 @@ namespace SuperPutty
         private void newSessionTSMI_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem menuItem = (ToolStripMenuItem) sender;
-            SessionData session = menuItem.Tag as SessionData;
+            SessionLeaf session = (SessionLeaf)menuItem.Tag;
             if (session != null)
             {
                 SuperPuTTY.OpenPuttySession(session);
@@ -476,6 +486,7 @@ namespace SuperPutty
         }
 
         public string TextOverride { get; set; }
+        public Int64 Id { get; set; }
 
     }
 }

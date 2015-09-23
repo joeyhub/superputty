@@ -143,7 +143,12 @@
     <Setting Name="PscpHomePrefix" Type="System.String" Scope="User">
       <Value Profile="(Default)">/home/</Value>
     </Setting>
-    <Setting Name="AutoUpdateCheck" Type="System.Boolean" Scope="User">
+    <Setting Name="OpenSessionWith" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="SuperPutty.Properties.Setting.OpenWithDictionary" Scope="User">
+    </Setting>
+    <Setting Name="AutoUpdateCheck" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="AutoIncrementPrefixTabs" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

@@ -15,7 +15,7 @@ namespace SuperPutty.Scp
 
         public event EventHandler<AuthEventArgs> AuthRequest;
 
-        public BrowserPresenter(string name, IBrowserModel model, SessionData session, IFileTransferPresenter fileTransferPresenter)
+        public BrowserPresenter(string name, IBrowserModel model, SessionLeaf session, IFileTransferPresenter fileTransferPresenter)
         {
             this.Model = model;
             this.Session = session;
@@ -175,7 +175,7 @@ namespace SuperPutty.Scp
 
         public IBrowserViewModel ViewModel { get; protected set; }
         public BrowserFileInfo CurrentPath { get; protected set; }
-        public SessionData Session { get; protected set; }
+        public SessionLeaf Session { get; protected set; }
     } 
 
     #endregion

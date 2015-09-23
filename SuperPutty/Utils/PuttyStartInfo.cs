@@ -16,7 +16,7 @@ namespace SuperPutty.Utils
 
         private static readonly Regex regExEnvVars = new Regex(@"(%\w+%)");
 
-        public PuttyStartInfo(SessionData session)
+        public PuttyStartInfo(SessionLeaf session)
         {
             string argsToLog = null;
 
@@ -47,7 +47,7 @@ namespace SuperPutty.Utils
             Log.InfoFormat("Putty Args: '{0}'", argsToLog ?? this.Args);
         }
 
-        static string MakeArgs(SessionData session, bool includePassword)
+        static string MakeArgs(SessionLeaf session, bool includePassword)
         {
             string args = "-" + session.Proto.ToString().ToLower() + " ";
             args += (!String.IsNullOrEmpty(session.Password) && session.Password.Length > 0) 
@@ -97,7 +97,7 @@ namespace SuperPutty.Utils
             Process.Start(startInfo);
         }
 
-        public SessionData Session { get; private set; }
+        public SessionLeaf Session { get; private set; }
 
         public string Args { get; private set; }
         public string WorkingDir { get; private set; }

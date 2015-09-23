@@ -80,7 +80,7 @@ namespace SuperPuttyUnitTests.Scp
             Form form = new Form();
             form.Size = new Size(600, 800);
 
-            SessionData session = new SessionData
+            SessionLeaf session = new SessionLeaf
             {
                 Username = ScpConfig.UserName,
                 Password = ScpConfig.Password, 

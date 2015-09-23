@@ -17,15 +17,15 @@ namespace SuperPuttyUnitTests
         [TestView]
         public void Test()
         {
-            List<SessionData> sessions = SessionData.LoadSessionsFromFile("c:/Users/beau/SuperPuTTY/sessions.xml");
+            SessionNode root = SessionStorage.LoadSessionsFromFile("c:/Users/beau/SuperPuTTY/connections.xml");
             QuickSelectorData data = new QuickSelectorData();
 
-            foreach (SessionData sd in sessions)
+            foreach (SessionLeaf sd in root.Flatten<SessionLeaf>())
             {
                 data.ItemData.AddItemDataRow(
-                    sd.SessionName, 
-                    sd.SessionId, 
-                    sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black, null);
+                    sd.Name, 
+                    sd.GetFullPathToString(),
+                    sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black, sd);
             }
 
             QuickSelectorOptions opt = new QuickSelectorOptions();

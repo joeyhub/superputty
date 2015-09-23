@@ -6,6 +6,7 @@ using System.Configuration;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
+using System.Xml.Serialization;
 using log4net;
 using System.Collections;
 
@@ -13,6 +14,7 @@ namespace SuperPutty.Utils
 {
     /// <summary>
     /// PortableSettingsProvider
+    /// 
     /// 
     /// Based on 
     /// http://www.codeproject.com/Articles/20917/Creating-a-Custom-Settings-Provider
@@ -96,7 +98,10 @@ namespace SuperPutty.Utils
         {
             foreach (SettingsPropertyValue propVal in collection)
             {
-                SetValue(propVal);
+                if(propVal.Name.Equals("OpenSessionWith"))
+                    SetComplexValue(propVal);
+                else
+                    SetStringValue(propVal);
             }
 
             try
@@ -119,7 +124,12 @@ namespace SuperPutty.Utils
             {
                 SettingsPropertyValue value = new SettingsPropertyValue(setting);
                 value.IsDirty = true;
-                value.SerializedValue = GetValue(setting);
+
+                if(setting.Name.Equals("OpenSessionWith"))
+                    value.PropertyValue = GetComplexValue(setting);
+                else
+                    value.SerializedValue = GetStringValue(setting);
+
                 values.Add(value);
             }
 
@@ -159,62 +169,131 @@ namespace SuperPutty.Utils
             }
         }
 
-        private string GetValue(SettingsProperty setting)
+        private XmlNode GetXmlNode(SettingsProperty setting, bool backwards)
         {
-            string value = String.Empty;
+            XmlNode node = null;
 
             try
             {
                 if (UseRoamingSettings(setting))
                 {
-                    XmlNode node = SettingsXML.SelectSingleNode(SettingsRoot + "/" + setting.Name);
-                    if (node == null)
+                    node = SettingsXML.SelectSingleNode(SettingsRoot + "/" + setting.Name);
+
+                    if (node == null && backwards)
                     {
                         // try go by host...backwards compatibility
                         node = SettingsXML.SelectSingleNode(SettingsRoot + "/" + GetHostName() + "/" + setting.Name);
                     }
-                    value = node.InnerText;
                 }
                 else
-                {
-                    value = SettingsXML.SelectSingleNode(SettingsRoot + "/" + GetHostName() + "/" + setting.Name).InnerText;
-                }
+                    node = SettingsXML.SelectSingleNode(SettingsRoot + "/" + GetHostName() + "/" + setting.Name);
             }
-            catch (Exception)
+            catch(Exception e)
             {
-                if (setting.DefaultValue != null)
+                Log.WarnFormat("Exception loading node for {0}, {1}", setting.Name, e.Message);
+            }
+
+            return node;
+        }
+
+        private object GetComplexValue(SettingsProperty setting)
+        {
+            object value = setting.DefaultValue;
+
+            XmlNode node = GetXmlNode(setting, true);
+
+            if (node != null)
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(setting.PropertyType);
+
+                using (StringReader reader = new StringReader(node.InnerXml))
                 {
-                    value = setting.DefaultValue.ToString();
-                }
-                else
-                {
-                    value = String.Empty;
+                    value = (object)xmlSerializer.Deserialize(reader);
                 }
             }
 
             return value;
         }
 
-        private void SetValue(SettingsPropertyValue propVal)
+        private string GetStringValue(SettingsProperty setting)
+        {
+            string value = String.Empty;
+
+            XmlNode node = GetXmlNode(setting, true);
+
+            if(node == null)
+                if (setting.DefaultValue != null)
+                    value = setting.DefaultValue.ToString();
+                else
+                    value = String.Empty;
+            else
+                value = node.InnerText;
+
+            return value;
+        }
+
+        private XmlNode GetMachineNode()
         {
             XmlNode machineNode;
-            XmlNode settingNode;
 
-            // Determine if the setting is roaming.
-            // If roaming then the value is stored as an element under the root
-            // Otherwise it is stored under a machine name node 
+            // Its machine specific, store as an element of the machine name node,
+            // creating a new machine name node if one doesnt exist.
+            string nodePath = SettingsRoot + "/" + GetHostName();
             try
             {
-                if (UseRoamingSettings(propVal.Property))
-                    settingNode = (XmlElement)SettingsXML.SelectSingleNode(SettingsRoot + "/" + propVal.Name);
-                else
-                    settingNode = (XmlElement)SettingsXML.SelectSingleNode(SettingsRoot + "/" + GetHostName() + "/" + propVal.Name);
+                machineNode = (XmlElement)SettingsXML.SelectSingleNode(nodePath);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                settingNode = null;
+                Log.Error("Error selecting node, " + nodePath, ex);
+                machineNode = SettingsXML.CreateElement(GetHostName());
+                SettingsXML.SelectSingleNode(SettingsRoot).AppendChild(machineNode);
             }
 
+            if (machineNode == null)
+            {
+                machineNode = SettingsXML.CreateElement(GetHostName());
+                SettingsXML.SelectSingleNode(SettingsRoot).AppendChild(machineNode);
+            }
+
+            return machineNode;
+        }
+
+        private void SetComplexValue(SettingsPropertyValue propVal)
+        {
+            XmlNode settingNode = GetXmlNode(propVal.Property, false);
+
+            // Warning: Currently this doesn't loop. If more sources are added it will and will nuke everything.
+            while (settingNode != null)
+            {
+                settingNode.ParentNode.RemoveChild(settingNode);
+                settingNode = GetXmlNode(propVal.Property, false);
+            }
+
+            if (propVal.PropertyValue == null)
+                return;
+
+            XmlSerializer serializer = new XmlSerializer(propVal.Property.PropertyType);
+            XmlElement valueNode = SettingsXML.CreateElement(propVal.Name);
+            var settings = new XmlWriterSettings();
+            settings.OmitXmlDeclaration = true;
+
+            using (StringWriter stream = new StringWriter())
+            using (XmlWriter writer = XmlWriter.Create(stream, settings))
+            {
+                serializer.Serialize(writer, propVal.PropertyValue);
+                valueNode.InnerXml = stream.ToString();
+            }
+
+            if (UseRoamingSettings(propVal.Property))
+                SettingsXML.SelectSingleNode(SettingsRoot).AppendChild(valueNode);
+            else
+                GetMachineNode().AppendChild(valueNode);
+        }
+
+        private void SetStringValue(SettingsPropertyValue propVal)
+        {
+            XmlNode settingNode = GetXmlNode(propVal.Property, false);
 
             // Check to see if the node exists, if so then set its new value
             if (settingNode != null)
@@ -232,29 +311,9 @@ namespace SuperPutty.Utils
                 }
                 else
                 {
-                    // Its machine specific, store as an element of the machine name node,
-                    // creating a new machine name node if one doesnt exist.
-                    string nodePath = SettingsRoot + "/" + GetHostName();
-                    try
-                    {
-                        machineNode = (XmlElement)SettingsXML.SelectSingleNode(nodePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Error selecting node, " + nodePath, ex);
-                        machineNode = SettingsXML.CreateElement(GetHostName());
-                        SettingsXML.SelectSingleNode(SettingsRoot).AppendChild(machineNode);
-                    }
-
-                    if (machineNode == null)
-                    {
-                        machineNode = SettingsXML.CreateElement(GetHostName());
-                        SettingsXML.SelectSingleNode(SettingsRoot).AppendChild(machineNode);
-                    }
-
                     settingNode = SettingsXML.CreateElement(propVal.Name);
                     settingNode.InnerText = propVal.SerializedValue.ToString();
-                    machineNode.AppendChild(settingNode);
+                    GetMachineNode().AppendChild(settingNode);
                 }
             }
         }

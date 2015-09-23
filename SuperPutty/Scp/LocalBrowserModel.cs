@@ -12,7 +12,7 @@ namespace SuperPutty.Scp
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(LocalBrowserModel));
 
-        public ListDirectoryResult ListDirectory(SessionData session, BrowserFileInfo path)
+        public ListDirectoryResult ListDirectory(SessionLeaf session, BrowserFileInfo path)
         {
             Log.InfoFormat("GetFilesForPath, path={0}", path.Path);
 

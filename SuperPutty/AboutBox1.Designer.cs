@@ -144,10 +144,11 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox2.Size = new System.Drawing.Size(344, 114);
+            this.textBox2.Size = new System.Drawing.Size(523, 107);
             this.textBox2.TabIndex = 25;
             this.textBox2.TabStop = false;
             this.textBox2.Text = resources.GetString("textBox2.Text");
+            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // tabPage1
             // 
@@ -177,6 +178,7 @@
             this.textBox1.Text = "SuperPutty is a tabbed interface for the PuTTY SSH Client. It is can be used for " +
     "both terminal sessions and file transfers both utilizing the secure SSH protocol" +
     ".";
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // tabControl1
             // 
