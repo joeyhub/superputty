@@ -434,8 +434,8 @@ namespace SuperPutty
         {
             bool isRootNode = this.treeView1.SelectedNode != this.nodeRoot;
             this.renameToolStripMenuItem.Enabled = isRootNode;
-            // TODO: handle removing folder and nodes in it recursively
-            this.removeFolderToolStripMenuItem.Enabled = isRootNode;// && this.treeView1.SelectedNode.Nodes.Count == 0;
+            this.copyFolderToolStripMenuItem.Enabled = isRootNode;
+            this.removeFolderToolStripMenuItem.Enabled = isRootNode;
         }
 
         private void contextMenuStripAddTreeItem_Opening(object sender, CancelEventArgs e)
