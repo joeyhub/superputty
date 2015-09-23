@@ -475,7 +475,7 @@ namespace SuperPutty.Data
             SessionNode node = (SessionNode)this.Clone();
 
             foreach (SessionData child in this.Children)
-                node.AddChild(child);
+                node.AddChild((SessionData)child.Clone());
 
             return node;
         }
