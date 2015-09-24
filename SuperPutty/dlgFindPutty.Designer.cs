@@ -77,6 +77,8 @@
             this.tabPageGeneral = new System.Windows.Forms.TabPage();
             this.tabPageGUI = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.textBoxRootDirPrefix = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
             this.textBoxHomeDirPrefix = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
@@ -105,10 +107,21 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.comboBoxActivatorType = new System.Windows.Forms.ComboBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.tabOpenWith1 = new System.Windows.Forms.TabPage();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.textBoxOpenWithArgs = new System.Windows.Forms.TextBox();
+            this.textBoxOpenWithName = new System.Windows.Forms.TextBox();
+            this.buttonOpenWithBrowse = new System.Windows.Forms.Button();
+            this.buttonOpenWithApply = new System.Windows.Forms.Button();
+            this.textBoxOpenWithProcess = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.comboBoxOpenWithPrograms = new System.Windows.Forms.ComboBox();
+            this.buttonOpenWithRemove = new System.Windows.Forms.Button();
             this.panelBottom = new System.Windows.Forms.Panel();
             this.fontDialog = new System.Windows.Forms.FontDialog();
-            this.label17 = new System.Windows.Forms.Label();
-            this.textBoxRootDirPrefix = new System.Windows.Forms.TextBox();
             this.tabControl.SuspendLayout();
             this.tabPageGeneral.SuspendLayout();
             this.tabPageGUI.SuspendLayout();
@@ -124,6 +137,9 @@
             this.tabPageAdvanced.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.tabOpenWith1.SuspendLayout();
+            this.groupBox9.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -559,6 +575,7 @@
             this.tabControl.Controls.Add(this.tabPageGUI);
             this.tabControl.Controls.Add(this.tabPageShortcuts);
             this.tabControl.Controls.Add(this.tabPageAdvanced);
+            this.tabControl.Controls.Add(this.tabOpenWith1);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(5, 5);
             this.tabControl.Name = "tabControl";
@@ -618,6 +635,22 @@
             this.groupBox7.TabIndex = 42;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "File Transfer Options";
+            // 
+            // textBoxRootDirPrefix
+            // 
+            this.textBoxRootDirPrefix.Location = new System.Drawing.Point(125, 46);
+            this.textBoxRootDirPrefix.Name = "textBoxRootDirPrefix";
+            this.textBoxRootDirPrefix.Size = new System.Drawing.Size(100, 20);
+            this.textBoxRootDirPrefix.TabIndex = 3;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(10, 49);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(104, 13);
+            this.label17.TabIndex = 2;
+            this.label17.Text = "Root Directory Prefix";
             // 
             // textBoxHomeDirPrefix
             // 
@@ -934,6 +967,132 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Application Behavior";
             // 
+            // tabOpenWith1
+            // 
+            this.tabOpenWith1.Controls.Add(this.groupBox9);
+            this.tabOpenWith1.Controls.Add(this.groupBox8);
+            this.tabOpenWith1.Location = new System.Drawing.Point(4, 22);
+            this.tabOpenWith1.Name = "tabOpenWith1";
+            this.tabOpenWith1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabOpenWith1.Size = new System.Drawing.Size(596, 287);
+            this.tabOpenWith1.TabIndex = 4;
+            this.tabOpenWith1.Text = "Open With";
+            this.tabOpenWith1.UseVisualStyleBackColor = true;
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.textBoxOpenWithArgs);
+            this.groupBox9.Controls.Add(this.textBoxOpenWithName);
+            this.groupBox9.Controls.Add(this.buttonOpenWithBrowse);
+            this.groupBox9.Controls.Add(this.buttonOpenWithApply);
+            this.groupBox9.Controls.Add(this.textBoxOpenWithProcess);
+            this.groupBox9.Controls.Add(this.label21);
+            this.groupBox9.Controls.Add(this.label20);
+            this.groupBox9.Controls.Add(this.label19);
+            this.groupBox9.Location = new System.Drawing.Point(7, 64);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(586, 97);
+            this.groupBox9.TabIndex = 1;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Update";
+            // 
+            // textBoxOpenWithArgs
+            // 
+            this.textBoxOpenWithArgs.Location = new System.Drawing.Point(262, 17);
+            this.textBoxOpenWithArgs.Name = "textBoxOpenWithArgs";
+            this.textBoxOpenWithArgs.Size = new System.Drawing.Size(305, 20);
+            this.textBoxOpenWithArgs.TabIndex = 7;
+            this.textBoxOpenWithArgs.Text = "{Host}";
+            this.textBoxOpenWithArgs.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
+            // 
+            // textBoxOpenWithName
+            // 
+            this.textBoxOpenWithName.Location = new System.Drawing.Point(59, 17);
+            this.textBoxOpenWithName.Name = "textBoxOpenWithName";
+            this.textBoxOpenWithName.Size = new System.Drawing.Size(134, 20);
+            this.textBoxOpenWithName.TabIndex = 6;
+            // 
+            // buttonOpenWithBrowse
+            // 
+            this.buttonOpenWithBrowse.Location = new System.Drawing.Point(502, 40);
+            this.buttonOpenWithBrowse.Name = "buttonOpenWithBrowse";
+            this.buttonOpenWithBrowse.Size = new System.Drawing.Size(75, 23);
+            this.buttonOpenWithBrowse.TabIndex = 4;
+            this.buttonOpenWithBrowse.Text = "Browse";
+            this.buttonOpenWithBrowse.UseVisualStyleBackColor = true;
+            // 
+            // buttonOpenWithApply
+            // 
+            this.buttonOpenWithApply.Location = new System.Drawing.Point(10, 68);
+            this.buttonOpenWithApply.Name = "buttonOpenWithApply";
+            this.buttonOpenWithApply.Size = new System.Drawing.Size(567, 23);
+            this.buttonOpenWithApply.TabIndex = 5;
+            this.buttonOpenWithApply.Text = "Create/Update";
+            this.buttonOpenWithApply.UseVisualStyleBackColor = true;
+            // 
+            // textBoxOpenWithProcess
+            // 
+            this.textBoxOpenWithProcess.Location = new System.Drawing.Point(59, 42);
+            this.textBoxOpenWithProcess.Name = "textBoxOpenWithProcess";
+            this.textBoxOpenWithProcess.Size = new System.Drawing.Size(437, 20);
+            this.textBoxOpenWithProcess.TabIndex = 3;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(7, 45);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(46, 13);
+            this.label21.TabIndex = 2;
+            this.label21.Text = "Program";
+            this.label21.Click += new System.EventHandler(this.label21_Click);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(199, 20);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(57, 13);
+            this.label20.TabIndex = 1;
+            this.label20.Text = "Arguments";
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(7, 20);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(35, 13);
+            this.label19.TabIndex = 0;
+            this.label19.Text = "Name";
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.comboBoxOpenWithPrograms);
+            this.groupBox8.Controls.Add(this.buttonOpenWithRemove);
+            this.groupBox8.Location = new System.Drawing.Point(7, 7);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(583, 50);
+            this.groupBox8.TabIndex = 0;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Programs";
+            // 
+            // comboBoxOpenWithPrograms
+            // 
+            this.comboBoxOpenWithPrograms.FormattingEnabled = true;
+            this.comboBoxOpenWithPrograms.Location = new System.Drawing.Point(7, 20);
+            this.comboBoxOpenWithPrograms.Name = "comboBoxOpenWithPrograms";
+            this.comboBoxOpenWithPrograms.Size = new System.Drawing.Size(489, 21);
+            this.comboBoxOpenWithPrograms.TabIndex = 1;
+            // 
+            // buttonOpenWithRemove
+            // 
+            this.buttonOpenWithRemove.Location = new System.Drawing.Point(502, 20);
+            this.buttonOpenWithRemove.Name = "buttonOpenWithRemove";
+            this.buttonOpenWithRemove.Size = new System.Drawing.Size(75, 23);
+            this.buttonOpenWithRemove.TabIndex = 0;
+            this.buttonOpenWithRemove.Text = "Remove";
+            this.buttonOpenWithRemove.UseVisualStyleBackColor = true;
+            // 
             // panelBottom
             // 
             this.panelBottom.Controls.Add(this.buttonCancel);
@@ -943,22 +1102,6 @@
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(604, 27);
             this.panelBottom.TabIndex = 39;
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(10, 49);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(104, 13);
-            this.label17.TabIndex = 2;
-            this.label17.Text = "Root Directory Prefix";
-            // 
-            // textBoxRootDirPrefix
-            // 
-            this.textBoxRootDirPrefix.Location = new System.Drawing.Point(125, 46);
-            this.textBoxRootDirPrefix.Name = "textBoxRootDirPrefix";
-            this.textBoxRootDirPrefix.Size = new System.Drawing.Size(100, 20);
-            this.textBoxRootDirPrefix.TabIndex = 3;
             // 
             // dlgFindPutty
             // 
@@ -1002,6 +1145,10 @@
             this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.tabOpenWith1.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -1088,5 +1235,18 @@
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox textBoxRootDirPrefix;
         private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TabPage tabOpenWith1;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.TextBox textBoxOpenWithArgs;
+        private System.Windows.Forms.TextBox textBoxOpenWithName;
+        private System.Windows.Forms.Button buttonOpenWithApply;
+        private System.Windows.Forms.Button buttonOpenWithBrowse;
+        private System.Windows.Forms.TextBox textBoxOpenWithProcess;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.ComboBox comboBoxOpenWithPrograms;
+        private System.Windows.Forms.Button buttonOpenWithRemove;
     }
 }

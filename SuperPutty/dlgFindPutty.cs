@@ -31,6 +31,7 @@ using log4net;
 using SuperPutty.Data;
 using SuperPutty.Utils;
 using SuperPutty.Gui;
+using SuperPutty.Properties.Setting;
 
 namespace SuperPutty
 {
@@ -208,6 +209,81 @@ namespace SuperPutty
                 this.Shortcuts.Add(ks);
             }
             this.dataGridViewShortcuts.DataSource = this.Shortcuts;
+            this.InitializeOpenWith();
+        }
+
+        private OpenWithDictionary openSessionWith;
+
+        private void InitializeOpenWith()
+        {
+            this.comboBoxOpenWithPrograms.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.openSessionWith = new OpenWithDictionary();
+
+            if (SuperPuTTY.Settings.OpenSessionWith != null)
+                foreach (KeyValuePair<string, OpenWith> entry in SuperPuTTY.Settings.OpenSessionWith)
+                {
+                    OpenWith openWith = new OpenWith(entry.Value.Name, entry.Value.Process, entry.Value.Args);
+                    this.openSessionWith.Add(entry.Value.Name, openWith);
+                    this.comboBoxOpenWithPrograms.Items.Add(openWith);
+                }
+
+            this.comboBoxOpenWithPrograms.SelectedIndexChanged += delegate(object sender, EventArgs e)
+            {
+                if (this.comboBoxOpenWithPrograms.SelectedItem == null)
+                    return;
+
+                OpenWith item = (OpenWith)this.comboBoxOpenWithPrograms.SelectedItem;
+                this.textBoxOpenWithName.Text = item.Name;
+                this.textBoxOpenWithProcess.Text = item.Process;
+                this.textBoxOpenWithArgs.Text = item.Args;
+            };
+
+            this.buttonOpenWithRemove.Click += delegate(object sender, EventArgs e)
+            {
+                if (this.comboBoxOpenWithPrograms.SelectedItem == null)
+                    return;
+
+                OpenWith item = (OpenWith)this.comboBoxOpenWithPrograms.SelectedItem;
+                this.openSessionWith.Remove(item.Name);
+                this.comboBoxOpenWithPrograms.Items.Remove(item);
+            };
+
+            this.buttonOpenWithBrowse.Click += delegate(object sender, EventArgs e)
+            {
+                this.openFileDialog1.Filter = "Programs (*.exe)|*.exe";
+                this.openFileDialog1.FileName = "";
+                if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
+                {
+                    if (!String.IsNullOrEmpty(this.openFileDialog1.FileName))
+                        this.textBoxOpenWithProcess.Text = this.openFileDialog1.FileName;
+                }
+            };
+
+            this.buttonOpenWithApply.Click += delegate(object sender, EventArgs e)
+            {
+                OpenWith openWith;
+                string name = this.textBoxOpenWithName.Text;
+                string process = this.textBoxOpenWithProcess.Text;
+                string args = this.textBoxOpenWithArgs.Text;
+
+                if (name == String.Empty || process == String.Empty || !File.Exists(process))
+                    return;
+
+                if (SuperPuTTY.Settings.OpenSessionWith.ContainsKey(name))
+                {
+                    openWith = this.openSessionWith[name];
+                    openWith.Process = process;
+                    openWith.Args = args;
+                }
+                else
+                {
+                    openWith = new OpenWith(name, process, args);
+                    this.openSessionWith.Add(name, openWith);
+                    this.comboBoxOpenWithPrograms.Items.Add(openWith);
+                }
+
+                this.comboBoxOpenWithPrograms.SelectedItem = openWith;
+            };
         }
 
         private void InitLayouts()
@@ -315,6 +391,7 @@ namespace SuperPutty
                 KeyboardShortcut[] shortcuts = new KeyboardShortcut[this.Shortcuts.Count];
                 this.Shortcuts.CopyTo(shortcuts, 0);
                 SuperPuTTY.Settings.UpdateFromShortcuts(shortcuts);
+                SuperPuTTY.Settings.OpenSessionWith = this.openSessionWith;
 
                 SuperPuTTY.Settings.Save();
 
@@ -469,6 +546,16 @@ namespace SuperPutty
         static string ToShortString(Font font)
         {
             return String.Format("{0}, {1} pt, {2}", font.FontFamily.Name, font.Size, font.Style);
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label21_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

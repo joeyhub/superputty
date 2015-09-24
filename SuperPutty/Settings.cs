@@ -136,13 +136,20 @@ namespace SuperPutty.Properties {
     namespace Setting {
         public class OpenWith
         {
+            public string Name { get; set; }
             public string Process { get; set; }
             public string Args { get; set; }
 
-            public OpenWith(string process, string args)
+            public OpenWith(string name, string process, string args)
             {
+                this.Name = name;
                 this.Process = process;
                 this.Args = args;
+            }
+
+            public override string ToString()
+            {
+                return Name;
             }
         }
 
@@ -162,7 +169,7 @@ namespace SuperPutty.Properties {
 
                     // Warning: This might be null.
                     string name = reader["Name"];
-                    this[name] = new OpenWith(reader["Process"], reader["Args"]);
+                    this[name] = new OpenWith(name, reader["Process"], reader["Args"]);
                 }
             }
 
