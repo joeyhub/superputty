@@ -967,7 +967,6 @@
             this.textBoxOpenWithArgs.Size = new System.Drawing.Size(315, 20);
             this.textBoxOpenWithArgs.TabIndex = 7;
             this.textBoxOpenWithArgs.Text = "{Host}";
-            this.textBoxOpenWithArgs.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
             // textBoxOpenWithName
             // 
@@ -1009,7 +1008,6 @@
             this.label21.Size = new System.Drawing.Size(46, 13);
             this.label21.TabIndex = 2;
             this.label21.Text = "Program";
-            this.label21.Click += new System.EventHandler(this.label21_Click);
             // 
             // label20
             // 
