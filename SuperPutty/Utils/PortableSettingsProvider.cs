@@ -202,7 +202,7 @@ namespace SuperPutty.Utils
 
             XmlNode node = GetXmlNode(setting, true);
 
-            if (node != null)
+            if (node != null && node.InnerXml.Trim() != "")
             {
                 XmlSerializer xmlSerializer = new XmlSerializer(setting.PropertyType);
 

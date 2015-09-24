@@ -144,6 +144,8 @@
       <Value Profile="(Default)">/home/</Value>
     </Setting>
     <Setting Name="OpenSessionWith" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="SuperPutty.Properties.Setting.OpenWithDictionary" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;OpenWithDictionary /&gt;</Value>
     </Setting>
     <Setting Name="AutoIncrementPrefixTabs" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
