@@ -66,7 +66,8 @@ namespace SuperPutty
             this.Id = ctlPuttyPanel.Count++;
             this.Text = session.Name;
 
-            if (SuperPuTTY.Settings.AutoIncrementPrefixTabs)
+            // Note: This definitely needs to be refactored.
+            if ((SuperPutty.frmSuperPutty.TabTextBehavior)Enum.Parse(typeof(frmSuperPutty.TabTextBehavior), SuperPuTTY.Settings.TabTextBehavior) == frmSuperPutty.TabTextBehavior.PrefixedStatic)
                 this.TextOverride = Convert.ToString(this.Id, 16).ToUpper() + " " + this.Text;
             else
                 this.TextOverride = this.Text;

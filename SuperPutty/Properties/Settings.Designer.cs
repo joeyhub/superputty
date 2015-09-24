@@ -634,32 +634,6 @@ namespace SuperPutty.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<OpenWithDictionary />")]
-        public global::SuperPutty.Properties.Setting.OpenWithDictionary OpenSessionWith {
-            get {
-                return ((global::SuperPutty.Properties.Setting.OpenWithDictionary)(this["OpenSessionWith"]));
-            }
-            set {
-                this["OpenSessionWith"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AutoIncrementPrefixTabs {
-            get {
-                return ((bool)(this["AutoIncrementPrefixTabs"]));
-            }
-            set {
-                this["AutoIncrementPrefixTabs"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoUpdateCheck {
@@ -681,6 +655,19 @@ namespace SuperPutty.Properties {
             }
             set {
                 this["PscpRootHomePrefix"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(SuperPutty.Utils.PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("\r\n          <OpenWithDictionary />\r\n        ")]
+        public global::SuperPutty.Properties.Setting.OpenWithDictionary OpenSessionWith {
+            get {
+                return ((global::SuperPutty.Properties.Setting.OpenWithDictionary)(this["OpenSessionWith"]));
+            }
+            set {
+                this["OpenSessionWith"] = value;
             }
         }
     }

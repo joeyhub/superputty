@@ -1609,7 +1609,8 @@ namespace SuperPutty
         {
             Static,
             Dynamic,
-            Mixed
+            Mixed,
+            PrefixedStatic
         }
 
     }

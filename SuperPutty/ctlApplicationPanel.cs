@@ -279,6 +279,7 @@ DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
 
             switch ((SuperPutty.frmSuperPutty.TabTextBehavior)Enum.Parse(typeof(frmSuperPutty.TabTextBehavior), SuperPuTTY.Settings.TabTextBehavior))
             {
+                case frmSuperPutty.TabTextBehavior.PrefixedStatic:
                 case frmSuperPutty.TabTextBehavior.Static:
                     this.Parent.Text = parentText;
                     break;
