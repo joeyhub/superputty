@@ -143,7 +143,7 @@ namespace SuperPutty
                 if(child is SessionNode)
                 {
                     ToolStripMenuItem newSessionFolder = new ToolStripMenuItem();
-                    newSessionFolder.Name = child.Name;
+                    newSessionFolder.Text = child.Name;
                     parent.DropDownItems.Add(newSessionFolder);
                     this.CreateNewMenu(newSessionFolder, (SessionNode)child);
                 }
@@ -161,6 +161,18 @@ namespace SuperPutty
 
         void CreateMenu()
         {
+            this.newSessionToolStripMenuItem.DropDownItems.Clear();
+            this.openWithMenuItem.DropDownItems.Clear();
+
+            if (SuperPuTTY.Settings.OpenSessionWith != null)
+                foreach (KeyValuePair<string, Properties.Setting.OpenWith> entry in SuperPuTTY.Settings.OpenSessionWith)
+                {
+                    ToolStripMenuItem menuItem = new ToolStripMenuItem();
+                    menuItem.Text = entry.Key;
+                    menuItem.Click += new EventHandler(this.OpenWithMenuItem_Click);
+                    this.openWithMenuItem.DropDownItems.Add(menuItem);
+                }
+
             this.newSessionToolStripMenuItem.Enabled = SuperPuTTY.Settings.PuttyPanelShowNewSessionMenu;
             if (SuperPuTTY.Settings.PuttyPanelShowNewSessionMenu)
             {
@@ -478,6 +490,15 @@ namespace SuperPutty
                 }
             });
             //SuperPuTTY.MainForm.BringToFront();
+        }
+
+        private void OpenWithMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
+            Properties.Setting.OpenWith openWith = SuperPuTTY.Settings.OpenSessionWith[menuItem.Text];
+            string args = openWith.Args.Replace("{Host}", this.Session.Host);
+            Process.Start(openWith.Process, args);
+            Log.InfoFormat("Process.start {0} {1}", openWith.Process, args);
         }
 
         public bool AcceptCommands

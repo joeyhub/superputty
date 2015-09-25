@@ -51,12 +51,14 @@
             this.closeOthersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeOthersToTheRightToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openWithMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openWithMenuItem,
             this.newSessionToolStripMenuItem,
             this.duplicateSessionToolStripMenuItem,
             this.toolStripSeparator1,
@@ -79,7 +81,7 @@
             this.closeOthersToTheRightToolStripMenuItem,
             this.closeAllToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(207, 408);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(207, 430);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // newSessionToolStripMenuItem
@@ -227,6 +229,12 @@
             this.closeAllToolStripMenuItem.Text = "Close All";
             this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.closeAllToolStripMenuItem_Click);
             // 
+            // openWithMenuItem
+            // 
+            this.openWithMenuItem.Name = "openWithMenuItem";
+            this.openWithMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.openWithMenuItem.Text = "Open With";
+            // 
             // ctlPuttyPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -265,6 +273,7 @@
         private System.Windows.Forms.ToolStripMenuItem closeOthersToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeOthersToTheRightToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openWithMenuItem;
 
     }
 }
