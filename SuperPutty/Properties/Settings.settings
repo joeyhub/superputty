@@ -154,5 +154,8 @@
           &lt;OpenWithDictionary /&gt;
         </Value>
     </Setting>
+    <Setting Name="Action_OpenScriptEditor_Shortcut" Provider="SuperPutty.Utils.PortableSettingsProvider" Type="System.Windows.Forms.Keys" Scope="User">
+      <Value Profile="(Default)">None</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

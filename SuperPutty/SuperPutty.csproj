@@ -92,6 +92,12 @@
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\KeyboardShortcut.cs" />
+    <Compile Include="dlgScriptEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dlgScriptEditor.Designer.cs">
+      <DependentUpon>dlgScriptEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="GitRelease.cs" />
     <Compile Include="Gui\BaseViewModel.cs" />
     <Compile Include="Gui\DataGridViewProgressColumn.cs" />
@@ -122,7 +128,6 @@
     </Compile>
     <Compile Include="Gui\QuickSelectorData.cs">
       <DependentUpon>QuickSelectorData.xsd</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Gui\QuickSelectorData.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -267,6 +272,9 @@
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dlgScriptEditor.resx">
+      <DependentUpon>dlgScriptEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\ImageListPopup.resx">
       <DependentUpon>ImageListPopup.cs</DependentUpon>
@@ -422,6 +430,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Apps-utilities-terminal.ico" />
+    <None Include="Resources\script_code.png" />
+    <None Include="Resources\folder-up.png" />
+    <None Include="Resources\page-blue.png" />
     <Content Include="_Lib\WeifenLuo.WinFormsUI.Docking.dll" />
     <None Include="Resources\find.png" />
     <Content Include="_Lib\log4net.dll" />
