@@ -47,7 +47,7 @@ namespace SuperPutty
         public const string ImageKeyFolder = "folder";
 
         TreeNodeFactory treeNodeFactory;
-        FolderTreeNode nodeRoot;
+        SourceTreeNode nodeRoot;
 
         /// <summary>
         /// Instantiate the treeview containing the sessions
@@ -75,7 +75,6 @@ namespace SuperPutty
             this.treeView1.BeginUpdate();
             this.LoadSessions();
             this.treeView1.EndUpdate();
-            SuperPuTTY.Sessions.root.Loaded += new EventHandler(OnSessionRootLoaded);
             SuperPuTTY.Settings.SettingsSaving += new SettingsSavingEventHandler(Settings_SettingsSaving);
         }
 
@@ -115,7 +114,6 @@ namespace SuperPutty
 
         protected override void OnClosed(EventArgs e)
         {
-            SuperPuTTY.Sessions.root.Loaded -= new EventHandler(OnSessionRootLoaded);
             SuperPuTTY.Settings.SettingsSaving -= new SettingsSavingEventHandler(Settings_SettingsSaving);
             base.OnClosed(e);
         }
@@ -126,17 +124,10 @@ namespace SuperPutty
         void LoadSessions()
         {
             this.treeView1.Nodes.Clear();
-            this.nodeRoot = this.treeNodeFactory.createFolder(SuperPuTTY.Sessions.root);
+            this.nodeRoot = this.treeNodeFactory.createSource(SuperPuTTY.Sessions.root);
             treeView1.Nodes.Add(this.nodeRoot);
             this.nodeRoot.ContextMenuStrip = this.contextMenuStripFolder;
             ExpandInitialTree();
-        }
-
-        void OnSessionRootLoaded(object sender, EventArgs e)
-        {
-            this.treeView1.BeginUpdate();
-            this.LoadSessions();
-            this.treeView1.EndUpdate();
         }
 
         /// <summary>
@@ -147,18 +138,17 @@ namespace SuperPutty
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             // e is null if this method is called from connectToolStripMenuItem_Click
-            TreeNode node = (e != null) ? e.Node : treeView1.SelectedNode;
+            SessionTreeNode node = (SessionTreeNode)((e != null) ? e.Node : treeView1.SelectedNode);
 
             if (node is SessionTreeNode && node == treeView1.SelectedNode)
             {
-                SessionLeaf sessionLeaf = (SessionLeaf)node.Tag;
-                SuperPuTTY.OpenPuttySession(sessionLeaf);
+                SuperPuTTY.OpenPuttySession(node.Session);
             }
         }
 
         private void OpenWithToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SessionLeaf session = (SessionLeaf)treeView1.SelectedNode.Tag;
+            SessionLeaf session = ((SessionTreeNode)treeView1.SelectedNode).Session;
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             Properties.Setting.OpenWith openWith = SuperPuTTY.Settings.OpenSessionWith[menuItem.Text];
             string args = openWith.Args.Replace("{Host}", session.Host);
@@ -178,32 +168,32 @@ namespace SuperPutty
 
             SessionLeaf session = null;
             SessionLeaf source = null;
-            TreeNode target = this.nodeRoot;
+            FolderTreeNode target = this.nodeRoot;
             string title = null;
-            TreeNode node = treeView1.SelectedNode;
+            DataTreeNode node = (DataTreeNode)treeView1.SelectedNode;
 
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             bool isFolderNode = node is FolderTreeNode;
 
             if (menuItem.Text.ToLower().Equals("new") || isFolderNode)
             {
-                target = isFolderNode ? treeView1.SelectedNode : treeView1.SelectedNode.Parent;
+                target = (FolderTreeNode)(isFolderNode ? treeView1.SelectedNode : treeView1.SelectedNode.Parent);
                 title = "Create New Session";
             }
             else if (menuItem == this.createLikeToolStripMenuItem)
             {
                 // copy as
-                source = (SessionLeaf)node.Tag;
+                source = ((SessionTreeNode)node).Session;
                 session = (SessionLeaf)source.Clone();
-                target = treeView1.SelectedNode.Parent;
+                target = (FolderTreeNode)treeView1.SelectedNode.Parent;
                 title = "Create New Session Like " + session.Name;
             }
             else
             {
                 // edit, session node selected
-                source = (SessionLeaf)node.Tag;
+                source = ((SessionTreeNode)node).Session;
                 session = source;
-                target = node.Parent;
+                target = (FolderTreeNode)node.Parent;
                 title = "Edit Session: " + session.Name;
             }
 
@@ -217,7 +207,7 @@ namespace SuperPutty
             
             if (form.ShowDialog(this) == DialogResult.OK)
             {
-                SessionNode parent = (SessionNode)target.Tag;
+                SessionNode parent = ((FolderTreeNode)target).Session;
 
                 if (source != null)
                     session.Remove();
@@ -250,7 +240,7 @@ namespace SuperPutty
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DataTreeNode node = (DataTreeNode)treeView1.SelectedNode;
-            SessionData session = (SessionData)node.Tag;
+            SessionData session = node.Session;
 
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to delete " + session.Name + "?",
@@ -274,7 +264,7 @@ namespace SuperPutty
         /// <param name="e"></param>
         private void fileBrowserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SessionLeaf session = (SessionLeaf)treeView1.SelectedNode.Tag;
+            SessionLeaf session = ((SessionTreeNode)treeView1.SelectedNode).Session;
             SuperPuTTY.OpenScpSession(session);
         }
 
@@ -298,7 +288,7 @@ namespace SuperPutty
             TreeNode node = this.treeView1.SelectedNode;
             if (node is SessionTreeNode)
             {
-                PuttyStartInfo startInfo = new PuttyStartInfo((SessionLeaf)node.Tag);
+                PuttyStartInfo startInfo = new PuttyStartInfo(((SessionTreeNode)node).Session);
                 startInfo.StartStandalone();
             }
         }
@@ -308,11 +298,11 @@ namespace SuperPutty
             TreeNode node = this.treeView1.SelectedNode;
             if (node is SessionTreeNode)
             {
-                SuperPuTTY.LoadSessionInNewInstance((SessionLeaf)node.Tag);
+                SuperPuTTY.LoadSessionInNewInstance(((SessionTreeNode)node).Session);
             }
         }
 
-        private void newFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newNormalFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode node = this.treeView1.SelectedNode;
             if (node != null && node is FolderTreeNode)
@@ -329,7 +319,7 @@ namespace SuperPutty
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
                     SessionNode session = new SessionNode(dialog.ItemName);
-                    ((SessionNode)node.Tag).AddChild(session);
+                    (((FolderTreeNode)node).Session).AddChild(session);
                     SuperPuTTY.SaveSessions();
                 }
             }
@@ -337,10 +327,10 @@ namespace SuperPutty
 
         private void copyFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode node = this.treeView1.SelectedNode;
+            FolderTreeNode node = (FolderTreeNode)this.treeView1.SelectedNode;
             if (node != null)
             {
-                SessionNode session = ((SessionNode)node.Tag).DeepClone();
+                SessionNode session = node.Session.DeepClone();
                 dlgRenameItem dialog = new dlgRenameItem();
                 dialog.Text = "Copy Folder As";
                 dialog.ItemName = session.Name;
@@ -353,7 +343,7 @@ namespace SuperPutty
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
                     session.Name = dialog.ItemName;
-                    SessionNode parent = (SessionNode)(node.Parent.Tag);
+                    SessionNode parent = ((FolderTreeNode)node.Parent).Session;
                     parent.AddChild(session);
                     SuperPuTTY.SaveSessions();
                 }
@@ -362,10 +352,10 @@ namespace SuperPutty
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode node = this.treeView1.SelectedNode;
+            FolderTreeNode node = (FolderTreeNode)this.treeView1.SelectedNode;
             if (node != null)
             {
-                SessionNode session = (SessionNode)node.Tag;
+                SessionNode session = node.Session;
                 dlgRenameItem dialog = new dlgRenameItem();
                 dialog.Text = "Rename Folder";
                 dialog.ItemName = session.Name;
@@ -386,7 +376,7 @@ namespace SuperPutty
 
         private void removeFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TreeNode node = this.treeView1.SelectedNode;
+            FolderTreeNode node = (FolderTreeNode)this.treeView1.SelectedNode;
             if (node != null && node != this.nodeRoot)
             {
                 DialogResult result = MessageBox.Show(
@@ -397,7 +387,7 @@ namespace SuperPutty
                 if (result != DialogResult.Yes)
                     return;
 
-                ((SessionData)node.Tag).Remove();
+                node.Session.Remove();
                 SuperPuTTY.SaveSessions();
                 SuperPuTTY.ReportStatus("Removed Folder, {0}", node.Text);
             }
@@ -566,7 +556,7 @@ namespace SuperPutty
 
             TreeNodeDroppabble droppable = (TreeNodeDroppabble)e.Data.GetData(typeof(TreeNodeDroppabble));
             DataTreeNode payload = droppable.Node;
-            SessionData session = (SessionData)payload.Tag;
+            SessionData session = ((DataTreeNode)payload).Session;
 
             Point pt = new Point(e.X, e.Y);
             pt = tree.PointToClient(pt);
@@ -575,7 +565,7 @@ namespace SuperPutty
             if (target is SessionTreeNode)
                 target = target.Parent;
 
-            SessionNode parent = (SessionNode)target.Tag;
+            SessionNode parent = ((FolderTreeNode)target).Session;
             session.Remove();
             parent.AddChild(session);
 
@@ -761,6 +751,9 @@ namespace SuperPutty
 
             public DataTreeNode create(SessionData session)
             {
+                if (session is SessionSource)
+                    return this.createSource((SessionSource)session);
+
                 if (session is SessionNode)
                     return this.createFolder((SessionNode)session);
 
@@ -768,6 +761,12 @@ namespace SuperPutty
                     return this.createSession((SessionLeaf)session);
 
                 return null;
+            }
+
+            public SourceTreeNode createSource(SessionSource session)
+            {
+                SourceTreeNode treeNode = new SourceTreeNode(session, this, this.AddTreeFolder, this.filter);
+                return treeNode;
             }
 
             public FolderTreeNode createFolder(SessionNode session)
@@ -792,28 +791,34 @@ namespace SuperPutty
         {
             protected TreeNodeFactory Factory;
             public bool Show = true;
+            protected SessionData _Session;
+            public SessionData Session { get { return this._Session; } protected set { this._Session = value; } }
 
             public DataTreeNode(SessionData session, TreeNodeFactory factory, ContextMenuStrip menu, SearchFilter filter)
             {
-                this.Tag = session;
+                this._Session = session;
                 this.Text = session.Name;
                 this.Factory = factory;
                 this.ContextMenuStrip = menu;
                 this.Show = filter == null;
+                this.Update(filter);
+            }
 
-                if(!this.Show)
+            protected void Update(SearchFilter filter)
+            {
+                if (!this.Show)
                 {
-                    this.Show = filter.IsMatch(session);
+                    this.Show = filter.IsMatch(this.Session);
 
                     if (this.Show)
-                        this.Factory = factory.Copy();
+                        this.Factory = this.Factory.Copy();
                 }
-                    
             }
         }
 
         public class FolderTreeNode : DataTreeNode
         {
+            public new SessionNode Session { get { return (SessionNode)this._Session; } protected set { this._Session = value; } }
             private List<DataTreeNode> Unsorted = new List<DataTreeNode>();
 
             public FolderTreeNode(SessionNode session, TreeNodeFactory factory, ContextMenuStrip menu, SearchFilter filter)
@@ -822,24 +827,31 @@ namespace SuperPutty
                 this.ToolTipText = String.Format("Id: {0}\nPath: {1}", session.Id, session.GetFullPathToString());
                 this.ImageKey = SessionTreeview.ImageKeyFolder;
                 this.SelectedImageKey = SessionTreeview.ImageKeyFolder;
+                this.Update(filter);
+                session.OnChange(new ListChangedEventHandler(Sessions_ListChanged));
+            }
 
-                foreach (SessionData child in session.GetChildren())
+            protected new void Update(SearchFilter filter)
+            {
+                base.Update(filter);
+                this.Nodes.Clear();
+
+                foreach (SessionData child in this.Session.GetChildren())
                 {
                     DataTreeNode node = this.Factory.create(child);
-                    
-                    if(node.Show)
+
+                    if (node.Show)
                         this.Nodes.Add(node);
 
                     this.Unsorted.Add(node);
                 }
 
                 this.Show = this.Show || this.Nodes.Count > 0;
-                session.OnChange(new ListChangedEventHandler(Sessions_ListChanged));
             }
 
             ~FolderTreeNode()
             {
-                ((SessionNode)this.Tag).OffChange(new ListChangedEventHandler(Sessions_ListChanged));
+                this.Session.OffChange(new ListChangedEventHandler(Sessions_ListChanged));
             }
 
             public List<T> FlattenTags<T>() where T : SessionData
@@ -848,7 +860,7 @@ namespace SuperPutty
 
                 foreach (DataTreeNode node in this.Nodes)
                 {
-                    SessionData child = (SessionData)node.Tag;
+                    SessionData child = (SessionData)node.Session;
 
                     if (child is T)
                         children.Add((T)child);
@@ -860,7 +872,7 @@ namespace SuperPutty
                 return children;
             }
 
-            void Sessions_ListChanged(object sender, ListChangedEventArgs e)
+            protected void Sessions_ListChanged(object sender, ListChangedEventArgs e)
             {
                 BindingList<SessionData> sessions = (BindingList<SessionData>)sender;
                 DataTreeNode node;
@@ -887,12 +899,38 @@ namespace SuperPutty
             }
         }
 
+        public class SourceTreeNode : FolderTreeNode
+        {
+            public new SessionSource Session { get { return (SessionSource)this._Session; } protected set { this._Session = value; } }
+
+            public SourceTreeNode(SessionSource session, TreeNodeFactory factory, ContextMenuStrip menu, SearchFilter filter)
+                : base(session, factory, menu, filter)
+            {
+                session.Loaded += new EventHandler(this.OnLoaded);
+            }
+
+            ~SourceTreeNode()
+            {
+                this.Session.Loaded -= new EventHandler(this.OnLoaded);
+            }
+
+            private void OnLoaded(object sender, EventArgs e)
+            {
+                this.TreeView.BeginUpdate();
+                this.Session.OffChange(new ListChangedEventHandler(this.Sessions_ListChanged));
+                base.Update(this.Factory.filter);
+                this.Session.OnChange(new ListChangedEventHandler(this.Sessions_ListChanged));
+                this.TreeView.EndUpdate();
+            }
+        }
+
         public class SessionTreeNode : DataTreeNode
         {
+            public new SessionLeaf Session { get { return (SessionLeaf)this._Session; } protected set { this._Session = value; } }
+
             public SessionTreeNode(SessionLeaf session, ImageList images, TreeNodeFactory factory, ContextMenuStrip menu, SearchFilter filter)
                 : base(session, factory, menu, filter)
             {
-                this.Tag = session;
                 this.Text = session.Name;
                 this.ToolTipText = session.ToString();
                 this.Show = filter == null || filter.IsMatch(session);

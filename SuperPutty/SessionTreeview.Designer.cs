@@ -49,6 +49,7 @@
             this.newSessionToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.newFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,7 +63,8 @@
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
-            this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newNormalFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newXmlFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripAddTreeItem.SuspendLayout();
             this.contextMenuStripFolder.SuspendLayout();
             this.panelSearch.SuspendLayout();
@@ -231,10 +233,19 @@
             // 
             // newFolderToolStripMenuItem
             // 
+            this.newFolderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newNormalFolderToolStripMenuItem,
+            this.newXmlFileFolderToolStripMenuItem});
             this.newFolderToolStripMenuItem.Name = "newFolderToolStripMenuItem";
             this.newFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.newFolderToolStripMenuItem.Text = "New Folder";
-            this.newFolderToolStripMenuItem.Click += new System.EventHandler(this.newFolderToolStripMenuItem_Click);
+            // 
+            // copyFolderToolStripMenuItem
+            // 
+            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
+            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
+            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
             // 
             // removeFolderToolStripMenuItem
             // 
@@ -344,12 +355,18 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
-            // copyFolderToolStripMenuItem
+            // newNormalFolderToolStripMenuItem
             // 
-            this.copyFolderToolStripMenuItem.Name = "copyFolderToolStripMenuItem";
-            this.copyFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
-            this.copyFolderToolStripMenuItem.Text = "Copy Folder";
-            this.copyFolderToolStripMenuItem.Click += new System.EventHandler(this.copyFolderToolStripMenuItem_Click);
+            this.newNormalFolderToolStripMenuItem.Name = "newNormalFolderToolStripMenuItem";
+            this.newNormalFolderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newNormalFolderToolStripMenuItem.Text = "Normal";
+            this.newNormalFolderToolStripMenuItem.Click += new System.EventHandler(newNormalFolderToolStripMenuItem_Click);
+            // 
+            // newXmlFileFolderToolStripMenuItem
+            // 
+            this.newXmlFileFolderToolStripMenuItem.Name = "newXmlFileFolderToolStripMenuItem";
+            this.newXmlFileFolderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newXmlFileFolderToolStripMenuItem.Text = "XML File";
             // 
             // SessionTreeview
             // 
@@ -409,5 +426,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newNormalFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newXmlFileFolderToolStripMenuItem;
     }
 }
