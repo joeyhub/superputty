@@ -33,6 +33,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Collections;
 using System.Reflection;
+using System.Timers;
 
 namespace SuperPutty.Data
 {
@@ -451,25 +452,63 @@ namespace SuperPutty.Data
 
             this.Increment = root.Increment;
             this.Children = root.Children;
+
+            foreach(SessionData child in this.Children)
+                child.Parent = this;
+
             this.OnLoaded();
         }
 
+        private bool IsDirty = false;
+
         public override void Save()
         {
-            SessionNode root = new SessionNode(this.Name);
-            root.Children = this.Children;
-            root.Increment = this.Increment;
-            root.Id = this.Id;
-            SaveSessionsToFile(root, this.Source);
+            if (this.IsDirty)
+                return;
+
+            if(this.WaitAfterSave != null)
+            {
+                Log.InfoFormat("Delaying save for {0}", this.Source);
+                this.IsDirty = true;
+                return;
+            }
+
+            Log.InfoFormat("Saving {0}", this.Source);
+            this.RealSave(this.Source);
+            this.WaitAfterSave = new Timer(10000);
+            this.WaitAfterSave.AutoReset = false;
+            this.WaitAfterSave.Elapsed += new ElapsedEventHandler(this.WaitedAfterSave);
+            this.WaitAfterSave.Start();
         }
 
         public void Save(string fileName)
+        {
+            this.RealSave(fileName);
+        }
+
+        private Timer WaitAfterSave;
+
+        private void WaitedAfterSave(object sender, EventArgs e)
+        {
+            if(this.IsDirty)
+            {
+                Log.InfoFormat("Delayed save for {0}", this.Source);
+                this.RealSave(this.Source);
+            }
+
+
+            this.WaitAfterSave.Elapsed -= new ElapsedEventHandler(this.WaitedAfterSave);
+            this.WaitAfterSave = null;
+        }
+
+        private void RealSave(string fileName)
         {
             SessionNode root = new SessionNode(this.Name);
             root.Children = this.Children;
             root.Increment = this.Increment;
             root.Id = this.Id;
             SaveSessionsToFile(root, fileName);
+            this.IsDirty = false;
         }
 
         public static SessionNode LoadSessionsFromFile(string fileName, string name)

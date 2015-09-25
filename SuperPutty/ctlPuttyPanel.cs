@@ -435,7 +435,7 @@ namespace SuperPutty
                         && puttyPanel.DockState != DockState.Hidden)
                     {
                         sessionData.LastDockstate = puttyPanel.DockState;
-                        SuperPuTTY.SaveSessions();
+                        sessionData.GetSourceNode().Save();
                     }
 
                     if (puttyPanel.InvokeRequired)

@@ -209,8 +209,8 @@ namespace SuperPutty
 
                     if (m_Login.Remember)
                     {
-                        //Session.SaveToRegistry(); // passwords are *never* saved and stored permanently
-                        SuperPuTTY.SaveSessions();
+                        // Note: Passwords are not persisted even if this is called.
+                        // m_Session.GetSourceNode().Save();
                     }
                 }
                 else

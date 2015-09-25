@@ -213,7 +213,7 @@ namespace SuperPutty
                     session.Remove();
 
                 parent.AddChild(form.Session);
-                SuperPuTTY.SaveSessions();
+                form.Session.GetSourceNode().Save();
             }
             
         }
@@ -251,8 +251,9 @@ namespace SuperPutty
             if (result == DialogResult.Yes)
             {
                 node.Remove();
+                SessionSource source = session.GetSourceNode();
                 session.Remove();
-                SuperPuTTY.SaveSessions();
+                source.Save();
             }
         }
 
@@ -320,7 +321,7 @@ namespace SuperPutty
                 {
                     SessionNode session = new SessionNode(dialog.ItemName);
                     (((FolderTreeNode)node).Session).AddChild(session);
-                    SuperPuTTY.SaveSessions();
+                    session.GetSourceNode().Save();
                 }
             }
         }
@@ -345,7 +346,7 @@ namespace SuperPutty
                     session.Name = dialog.ItemName;
                     SessionNode parent = ((FolderTreeNode)node.Parent).Session;
                     parent.AddChild(session);
-                    SuperPuTTY.SaveSessions();
+                    session.GetSourceNode().Save();
                 }
             }
         }
@@ -369,7 +370,7 @@ namespace SuperPutty
                 {
                     node.Text = dialog.ItemName;
                     session.Name = dialog.ItemName;
-                    SuperPuTTY.SaveSessions();
+                    session.GetSourceNode().Save();
                 }
             }
         }
@@ -387,8 +388,9 @@ namespace SuperPutty
                 if (result != DialogResult.Yes)
                     return;
 
+                SessionSource source = node.Session.GetSourceNode();
                 node.Session.Remove();
-                SuperPuTTY.SaveSessions();
+                source.Save();
                 SuperPuTTY.ReportStatus("Removed Folder, {0}", node.Text);
             }
         }
@@ -568,24 +570,12 @@ namespace SuperPutty
             SessionNode parent = ((FolderTreeNode)target).Session;
             session.Remove();
             parent.AddChild(session);
+            session.GetSourceNode().Save();
 
             target.Expand();
-
-            timerDelayedSave.Stop();
-            timerDelayedSave.Start();
         }
 
         #endregion
-
-        private void timerDelayedSave_Tick(object sender, EventArgs e)
-        {
-            // stop timer
-            timerDelayedSave.Stop();
-
-            // do save
-            SuperPuTTY.SaveSessions();
-            SuperPuTTY.ReportStatus("Saved Sessions after Drag-Drop @ {0}", DateTime.Now);
-        }
 
         #region Icon
         bool IsValidImage(string imageKey)

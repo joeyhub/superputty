@@ -316,13 +316,6 @@ namespace SuperPutty
             }
         }
 
-        /// <summary>Save in-application Session Database to XML File</summary>
-        public static void SaveSessions()
-        {
-            Log.InfoFormat("Saving all sessions");
-            sessions.root.Save();
-        }
-
         /// <summary>Open a new putty window with its settings being passed in a <seealso cref="SessionData"/> object</summary>
         /// <param name="session">The <seealso cref="SessionData"/> object containing the settings</param>
         public static void OpenPuttySession(SessionLeaf session)

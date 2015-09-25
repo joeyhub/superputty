@@ -58,7 +58,6 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timerDelayedSave = new System.Windows.Forms.Timer(this.components);
             this.panelSearch = new System.Windows.Forms.Panel();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
@@ -297,11 +296,6 @@
             this.collapseAllToolStripMenuItem.Text = "Collapse All";
             this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
             // 
-            // timerDelayedSave
-            // 
-            this.timerDelayedSave.Interval = 3000;
-            this.timerDelayedSave.Tick += new System.EventHandler(this.timerDelayedSave_Tick);
-            // 
             // panelSearch
             // 
             this.panelSearch.Controls.Add(this.txtSearch);
@@ -410,7 +404,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeFolderToolStripMenuItem;
-        private System.Windows.Forms.Timer timerDelayedSave;
         private System.Windows.Forms.ToolStripMenuItem createLikeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem expandAllToolStripMenuItem;
