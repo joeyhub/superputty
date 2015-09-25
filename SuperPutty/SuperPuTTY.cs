@@ -308,7 +308,7 @@ namespace SuperPutty
         {
             try
             {
-                sessions.Reload();
+                sessions.root.Load();
             }
             catch (Exception ex)
             {
@@ -320,7 +320,7 @@ namespace SuperPutty
         public static void SaveSessions()
         {
             Log.InfoFormat("Saving all sessions");
-            sessions.Save();
+            sessions.root.Save();
         }
 
         /// <summary>Open a new putty window with its settings being passed in a <seealso cref="SessionData"/> object</summary>
@@ -448,8 +448,7 @@ namespace SuperPutty
             if (File.Exists(fileName))
             {
                 Log.InfoFormat("Importing sessions from file, path={0}", fileName);
-                SessionNode sessions = SessionStorage.LoadSessionsFromFile(fileName);
-                sessions.Name = "Imported";
+                SessionNode sessions = SessionXmlFileSource.LoadSessionsFromFile(fileName, "Imported");
                 Sessions.Import(sessions);
             }
         }

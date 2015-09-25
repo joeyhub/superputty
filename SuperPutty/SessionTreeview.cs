@@ -75,7 +75,7 @@ namespace SuperPutty
             this.treeView1.BeginUpdate();
             this.LoadSessions();
             this.treeView1.EndUpdate();
-            SuperPuTTY.Sessions.RootLoaded += new EventHandler(OnSessionRootLoaded);
+            SuperPuTTY.Sessions.root.Loaded += new EventHandler(OnSessionRootLoaded);
             SuperPuTTY.Settings.SettingsSaving += new SettingsSavingEventHandler(Settings_SettingsSaving);
         }
 
@@ -115,7 +115,7 @@ namespace SuperPutty
 
         protected override void OnClosed(EventArgs e)
         {
-            SuperPuTTY.Sessions.RootLoaded -= new EventHandler(OnSessionRootLoaded);
+            SuperPuTTY.Sessions.root.Loaded -= new EventHandler(OnSessionRootLoaded);
             SuperPuTTY.Settings.SettingsSaving -= new SettingsSavingEventHandler(Settings_SettingsSaving);
             base.OnClosed(e);
         }

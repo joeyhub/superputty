@@ -53,8 +53,7 @@ namespace SuperPutty.Data
         private static readonly ILog Log = LogManager.GetLogger(typeof(SessionCollection));
         public const string ROOT_NAME = "PuTTY Sessions";
 
-        public SessionNode root {get; private set;}
-        public event EventHandler RootLoaded;
+        public SessionXmlFileSource root {get; private set;}
         private string FileName;
         
         public long Count
@@ -65,27 +64,8 @@ namespace SuperPutty.Data
 
         public SessionCollection(string fileName)
         {
-            this.root = new SessionNode(SessionCollection.ROOT_NAME);
             this.FileName = fileName;
-        }
-
-        private void Load()
-        {
-            this.root = SessionStorage.LoadSessionsFromFile(this.FileName);
-
-            if (this.RootLoaded != null)
-                this.RootLoaded(this, null);
-        }
-
-        public void Reload()
-        {
-            this.Load();
-        }
-
-        /// <summary>Saves the sessions to file (see constructor).</summary>
-        public void Save()
-        {
-            SessionStorage.SaveSessionsToFile(this.root, this.FileName);
+            this.root = new SessionXmlFileSource(SessionCollection.ROOT_NAME, this.FileName);
         }
 
         /// <summary>Import sessions from a from a <seealso cref="List"/> object into the specified folder</summary>
@@ -94,91 +74,16 @@ namespace SuperPutty.Data
         public void Import(SessionNode root)
         {
             this.root.AddChild(root);
-            this.Save();
-        }
-    }
-
-    public class SessionStorage
-    {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SessionStorage));
-
-        public static SessionNode LoadSessionsFromFile(string fileName)
-        {
-            SessionNode root = null;
-            SessionNode empty = new SessionNode(SessionCollection.ROOT_NAME);
-
-            if (File.Exists(fileName))
-            {
-                XmlSerializer s = new XmlSerializer(empty.GetType());
-                using (TextReader r = new StreamReader(fileName))
-                {
-                    root = (SessionNode)s.Deserialize(r);
-                }
-                Log.InfoFormat("Loaded sessions from {1}", fileName);
-            }
-            else
-            {
-                Log.WarnFormat("Could not load sessions, file doesn't exist.  file={0}", fileName);
-            }
-
-            if (root == null)
-                root = empty;
-
-            root.SetParents();
-
-            return root;
-        }
-
-        /// <summary>Save session configuration to the specified XML file</summary>
-        /// <param name="sessions">A <seealso cref="List"/> containing the session configuration data</param>
-        /// <param name="fileName">A path to a filename to save the data in</param>
-        public static void SaveSessionsToFile(SessionNode root, string fileName)
-        {
-            Log.InfoFormat("Saving sessions to {0}", fileName);
-            BackUpFiles(fileName, 20);
-            XmlSerializer s = new XmlSerializer(root.GetType());
-            using (TextWriter w = new StreamWriter(fileName))
-            {
-                s.Serialize(w, root);
-            }
-        }
-
-        private static void BackUpFiles(string fileName, int count)
-        {
-            if (File.Exists(fileName) && count > 0)
-            {
-                try
-                {
-                    // backup
-                    string fileBaseName = Path.GetFileNameWithoutExtension(fileName);
-                    string dirName = Path.GetDirectoryName(fileName);
-                    string backupName = Path.Combine(dirName, string.Format("{0}.{1:yyyyMMdd_hhmmss}.XML", fileBaseName, DateTime.Now));
-                    File.Copy(fileName, backupName, true);
-
-                    // limit last count saves
-                    List<string> oldFiles = new List<string>(Directory.GetFiles(dirName, fileBaseName + ".*.XML"));
-                    oldFiles.Sort();
-                    oldFiles.Reverse();
-                    if (oldFiles.Count > count)
-                    {
-                        for (int i = 20; i < oldFiles.Count; i++)
-                        {
-                            Log.InfoFormat("Cleaning up old file, {0}", oldFiles[i]);
-                            File.Delete(oldFiles[i]);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Error backing up files", ex);
-                }
-            }
+            this.root.Save();
         }
     }
 
     [XmlInclude(typeof(SessionNode)), XmlInclude(typeof(SessionLeaf))]
     public class SessionData
     {
+        [XmlIgnore]
+        public virtual bool IsReadOnly { get {return false;} }
+
         public static string GetUniqueId()
         {
             return DateTime.Now.Ticks.ToString();
@@ -193,7 +98,7 @@ namespace SuperPutty.Data
         public string Name;
 
         [XmlAttribute]
-        public int Id;
+        public virtual int Id { get;set; }
         [XmlIgnore]
         public SessionNode Parent;
 
@@ -211,6 +116,21 @@ namespace SuperPutty.Data
         public SessionData(string name)
         {
             Name = name;
+        }
+
+        public SessionSource GetSourceNode()
+        {
+            SessionData current = this.Parent;
+
+            while (current != null)
+            {
+                if(current is SessionSource)
+                    return (SessionSource)current;
+
+                current = current.Parent;
+            }
+
+            return null;
         }
 
         public List<int> GetIds()
@@ -285,16 +205,24 @@ namespace SuperPutty.Data
     {
         [XmlArrayItem(typeof(SessionNode), ElementName = "Folder")]
         [XmlArrayItem(typeof(SessionLeaf), ElementName = "Session")]
-        public BindingList<SessionData> Children = new BindingList<SessionData>();
+        public virtual BindingList<SessionData> Children { get; set; }
         [XmlAttribute]
-        public int Increment = 0;
+        public virtual int Increment { get; set; }
+
+        private void Initialise()
+        {
+            this.Children = new BindingList<SessionData>();
+            this.Increment = 0;
+        }
 
         public SessionNode() : base()
         {
+            this.Initialise();
         }
 
         public SessionNode(string name) : base(name)
         {
+            this.Initialise();
         }
 
         public void AddChild(SessionData child)
@@ -478,6 +406,143 @@ namespace SuperPutty.Data
                 node.AddChild((SessionData)(child.Clone()));
 
             return node;
+        }
+    }
+
+    public abstract class SessionSource : SessionNode
+    {
+        public string Source;
+        public event EventHandler Loaded;
+
+        public SessionSource(string name, string source) : base(name)
+        {
+            this.Source = source;
+        }
+
+        public void OnLoaded()
+        {
+            if (this.Loaded != null)
+                this.Loaded(this, null);
+        }
+
+        public abstract void Save();
+        public abstract void Load();
+    }
+
+    public class SessionXmlFileSource : SessionSource
+    {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(SessionXmlFileSource));
+
+        [XmlIgnore]
+        public override BindingList<SessionData> Children { get; set; }
+        [XmlIgnore]
+        public override int Increment { get; set; }
+
+        public SessionXmlFileSource(string name, string source) : base(name, source)
+        {
+        }
+
+        public override void Load()
+        {
+            SessionNode root = LoadSessionsFromFile(this.Source, this.Name);
+
+            if (root == null)
+                return;
+
+            this.Increment = root.Increment;
+            this.Children = root.Children;
+            this.OnLoaded();
+        }
+
+        public override void Save()
+        {
+            SessionNode root = new SessionNode(this.Name);
+            root.Children = this.Children;
+            root.Increment = this.Increment;
+            root.Id = this.Id;
+            SaveSessionsToFile(root, this.Source);
+        }
+
+        public void Save(string fileName)
+        {
+            SessionNode root = new SessionNode(this.Name);
+            root.Children = this.Children;
+            root.Increment = this.Increment;
+            root.Id = this.Id;
+            SaveSessionsToFile(root, fileName);
+        }
+
+        public static SessionNode LoadSessionsFromFile(string fileName, string name)
+        {
+            SessionNode root = null;
+            SessionNode empty = new SessionNode(name);
+
+            if (File.Exists(fileName))
+            {
+                XmlSerializer s = new XmlSerializer(empty.GetType());
+                using (TextReader r = new StreamReader(fileName))
+                {
+                    root = (SessionNode)s.Deserialize(r);
+                }
+                Log.InfoFormat("Loaded sessions from {1}", fileName);
+            }
+            else
+            {
+                Log.WarnFormat("Could not load sessions, file doesn't exist.  file={0}", fileName);
+            }
+
+            if (root == null)
+                root = empty;
+
+            root.SetParents();
+
+            return root;
+        }
+
+        /// <summary>Save session configuration to the specified XML file</summary>
+        /// <param name="sessions">A <seealso cref="List"/> containing the session configuration data</param>
+        /// <param name="fileName">A path to a filename to save the data in</param>
+        public static void SaveSessionsToFile(SessionNode root, string fileName)
+        {
+            Log.InfoFormat("Saving sessions to {0}", fileName);
+            BackUpFiles(fileName, 20);
+            XmlSerializer s = new XmlSerializer(root.GetType());
+            using (TextWriter w = new StreamWriter(fileName))
+            {
+                s.Serialize(w, root);
+            }
+        }
+
+        private static void BackUpFiles(string fileName, int count)
+        {
+            if (File.Exists(fileName) && count > 0)
+            {
+                try
+                {
+                    // backup
+                    string fileBaseName = Path.GetFileNameWithoutExtension(fileName);
+                    string dirName = Path.GetDirectoryName(fileName);
+                    string backupName = Path.Combine(dirName, string.Format("{0}.{1:yyyyMMdd_hhmmss}.XML", fileBaseName, DateTime.Now));
+                    File.Copy(fileName, backupName, true);
+
+                    // limit last count saves
+                    List<string> oldFiles = new List<string>(Directory.GetFiles(dirName, fileBaseName + ".*.XML"));
+                    oldFiles.Sort();
+                    oldFiles.Reverse();
+                    if (oldFiles.Count > count)
+                    {
+                        for (int i = 20; i < oldFiles.Count; i++)
+                        {
+                            Log.InfoFormat("Cleaning up old file, {0}", oldFiles[i]);
+                            File.Delete(oldFiles[i]);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error backing up files", ex);
+                }
+            }
         }
     }
 

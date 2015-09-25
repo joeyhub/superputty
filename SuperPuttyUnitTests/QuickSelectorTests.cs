@@ -17,7 +17,7 @@ namespace SuperPuttyUnitTests
         [TestView]
         public void Test()
         {
-            SessionNode root = SessionStorage.LoadSessionsFromFile("c:/Users/beau/SuperPuTTY/connections.xml");
+            SessionNode root = SessionXmlFileSource.LoadSessionsFromFile("c:/Users/beau/SuperPuTTY/connections.xml", "Test");
             QuickSelectorData data = new QuickSelectorData();
 
             foreach (SessionLeaf sd in root.Flatten<SessionLeaf>())

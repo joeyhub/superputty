@@ -306,7 +306,8 @@ namespace SuperPutty
             saveDialog.InitialDirectory = Application.StartupPath;
             if (saveDialog.ShowDialog(this) == DialogResult.OK)
             {
-                SessionStorage.SaveSessionsToFile(SuperPuTTY.Sessions.root, saveDialog.FileName);
+
+                SuperPuTTY.Sessions.root.Save(saveDialog.FileName);
             }
         }
 
