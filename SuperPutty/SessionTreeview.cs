@@ -138,9 +138,14 @@ namespace SuperPutty
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             // e is null if this method is called from connectToolStripMenuItem_Click
-            SessionTreeNode node = (SessionTreeNode)((e != null) ? e.Node : treeView1.SelectedNode);
+            TreeNode rawNode = e != null ? e.Node : treeView1.SelectedNode;
 
-            if (node is SessionTreeNode && node == treeView1.SelectedNode)
+            if (!(rawNode is SessionTreeNode))
+                return;
+
+            SessionTreeNode node = (SessionTreeNode)rawNode;
+
+            if (node == treeView1.SelectedNode)
             {
                 SuperPuTTY.OpenPuttySession(node.Session);
             }
