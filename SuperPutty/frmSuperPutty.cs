@@ -299,7 +299,7 @@ namespace SuperPutty
             if (saveDialog.ShowDialog(this) == DialogResult.OK)
             {
 
-                SuperPuTTY.Sessions.root.Save(saveDialog.FileName);
+                SuperPuTTY.Sessions.Save(saveDialog.FileName);
             }
         }
 
@@ -372,7 +372,7 @@ namespace SuperPutty
             QuickSelectorData data = new QuickSelectorData();
             data.CaseSensitive = SuperPuTTY.Settings.QuickSelectorCaseSensitiveSearch;
 
-            foreach (SessionLeaf sd in SuperPuTTY.Sessions.root.Flatten<SessionLeaf>())
+            foreach (SessionLeaf sd in SuperPuTTY.Sessions.Flatten<SessionLeaf>())
             {
                 data.ItemData.AddItemDataRow(
                     sd.Name,
@@ -432,7 +432,7 @@ namespace SuperPutty
 
         private void reloadSessionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SuperPuTTY.LoadSessions();
+            SuperPuTTY.Sessions.Load();
         }
 
         private void toolStripMenuItem2_Click(object sender, EventArgs e)

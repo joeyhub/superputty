@@ -132,7 +132,7 @@ namespace SuperPutty.Utils
             {
                 if (SessionData.IsStringIdValid(this.SessionId))
                 {
-                    SessionLeaf session = SuperPuTTY.Sessions.root.GetByStringId(this.SessionId);
+                    SessionLeaf session = SuperPuTTY.Sessions.GetByStringId(this.SessionId);
                     if (session == null)
                     {
                         Log.WarnFormat("Session from command line not found, id={0}", this.SessionId);

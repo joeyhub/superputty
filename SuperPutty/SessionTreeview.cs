@@ -129,7 +129,7 @@ namespace SuperPutty
         void LoadSessions()
         {
             this.treeView1.Nodes.Clear();
-            this.nodeRoot = this.treeNodeFactory.createSource(SuperPuTTY.Sessions.root);
+            this.nodeRoot = this.treeNodeFactory.createSource(SuperPuTTY.Sessions);
             treeView1.Nodes.Add(this.nodeRoot);
             this.nodeRoot.ContextMenuStrip = this.contextMenuStripFolder;
             ExpandInitialTree();

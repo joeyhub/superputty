@@ -178,7 +178,7 @@ namespace SuperPutty
             {
                 this.contextMenuStrip1.SuspendLayout();
                 // BBB: do i need to dispose each one?
-                this.CreateNewMenu(newSessionToolStripMenuItem, SuperPuTTY.Sessions.root);
+                this.CreateNewMenu(newSessionToolStripMenuItem, SuperPuTTY.Sessions);
                 this.contextMenuStrip1.ResumeLayout();
             }
 
@@ -318,10 +318,10 @@ namespace SuperPutty
         {
             // Warning: It is possible that a really short legacy id might be a new id but highly unlikely.
             if (SessionData.IsStringIdValid(sessionId))
-                return SuperPuTTY.Sessions.root.GetByStringId(sessionId);
+                return SuperPuTTY.Sessions.GetByStringId(sessionId);
 
             // Warning: No validity check on sessionId for legacy.
-            return SuperPuTTY.Sessions.root.GetByLegacyId(sessionId);
+            return SuperPuTTY.Sessions.GetByLegacyId(sessionId);
         }
 
         public static ctlPuttyPanel FromPersistString(String persistString)

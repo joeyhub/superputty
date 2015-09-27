@@ -49,36 +49,6 @@ namespace SuperPutty.Data
         Mintty
     }
 
-    public class SessionCollection
-    {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SessionCollection));
-        public const string ROOT_NAME = "PuTTY Sessions";
-
-        public SessionXmlFileSource root {get; private set;}
-        private string FileName;
-        
-        public long Count
-        {
-            get { return this.root.GetCount(); }
-            set {}
-        }
-
-        public SessionCollection(string fileName)
-        {
-            this.FileName = fileName;
-            this.root = new SessionXmlFileSource(SessionCollection.ROOT_NAME, this.FileName);
-        }
-
-        /// <summary>Import sessions from a from a <seealso cref="List"/> object into the specified folder</summary>
-        /// <param name="sessions">A <seealso cref="List"/> of <seealso cref="SessionData"/> objects</param>
-        /// <param name="folder">The destination folder name</param>
-        public void Import(SessionNode root)
-        {
-            this.root.AddChild(root);
-            this.root.Save();
-        }
-    }
-
     [XmlInclude(typeof(SessionNode)), XmlInclude(typeof(SessionLeaf))]
     public class SessionData
     {
@@ -450,6 +420,8 @@ namespace SuperPutty.Data
     [XmlRoot("Source")]
     public abstract class SessionSource : SessionNode
     {
+        public const string ROOT_NAME = "PuTTY Sessions";
+
         [XmlIgnore]
         public string Guid;
 

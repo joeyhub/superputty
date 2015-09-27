@@ -33,7 +33,7 @@ namespace SuperPutty
         static BindingList<LayoutData> layouts = new BindingList<LayoutData>();
 
         public const string SESSIONS_FILE = "connections.xml";
-        private static SessionCollection sessions;
+        private static SessionXmlFileSource sessions;
         static bool? isFirstRun;
 
         public static void Initialize(string[] args)
@@ -43,7 +43,6 @@ namespace SuperPutty
                 Version, Settings.SettingsFilePath, Settings.SettingsFolder);
 
             Log.InfoFormat("Loading all sessions.  file={0}", SessionsFileName);
-            sessions = new SessionCollection(SessionsFileName);
             LoadSessions();
             // Register IpcChanncel for single instance support
             SingleInstanceHelper.RegisterRemotingService();
@@ -309,7 +308,7 @@ namespace SuperPutty
         {
             try
             {
-                sessions.root.Load();
+                sessions = new SessionXmlFileSource(SessionSource.ROOT_NAME, SessionsFileName);
             }
             catch (Exception ex)
             {
@@ -434,6 +433,12 @@ namespace SuperPutty
             }
         }
 
+        private static void Import(SessionNode node)
+        {
+            Sessions.AddChild(node);
+            Sessions.Save();
+        }
+
         /// <summary>Import sessions from the specified file into the in-application database</summary>
         /// <param name="fileName">A string containing the path of the filename that holds session configuration</param>
         public static void ImportSessionsFromFile(string fileName)
@@ -449,7 +454,7 @@ namespace SuperPutty
                 foreach(SessionData child in sessions.Children)
                     dummy.AddChild(child);
 
-                Sessions.Import(dummy);
+                Import(dummy);
             }
         }
 
@@ -457,28 +462,28 @@ namespace SuperPutty
         public static void ImportSessionsFromPuTTY()
         {
             Log.InfoFormat("Importing sessions from PuTTY/KiTTY");
-            Sessions.Import(PuttyDataHelper.GetAllSessionsFromPuTTY());
+            Import(PuttyDataHelper.GetAllSessionsFromPuTTY());
         }
 
         /// <summary>Import sessions from Windows Registry which were set by PuttYCM and load them into the in-application sessions database</summary>
         public static void ImportSessionsFromPuttyCM(string fileExport)
         {
             Log.InfoFormat("Importing sessions from PuttyCM");
-            Sessions.Import(PuttyDataHelper.GetAllSessionsFromPuTTYCM(fileExport));
+            Import(PuttyDataHelper.GetAllSessionsFromPuTTYCM(fileExport));
         }
 
         /// <summary>Import sessions from older version of SuperPuTTY from the Windows Registry</summary>
         public static void ImportSessionsFromSuperPutty1030()
         {
             Log.InfoFormat("Importing sessions from SuperPutty1030");
-            Sessions.Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1030());
+            Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1030());
         }
 
         /// <summary>Import sessions from older version of SuperPuTTY from the Windows Registry</summary>
         public static void ImportSessionsFromSuperPutty1040(string fileExport)
         {
             Log.InfoFormat("Importing sessions from SuperPutty1040");
-            Sessions.Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1040(fileExport));
+            Import(PuttyDataHelper.GetAllSessionsFromSuperPutty1040(fileExport));
         }
 
         #endregion
@@ -596,7 +601,7 @@ namespace SuperPutty
         public static LayoutData CurrentLayout { get; private set; }
         public static LayoutData StartingLayout { get; private set; }
         public static SessionDataStartInfo StartingSession { get; private set; }
-        public static SessionCollection Sessions { get { return sessions; } }
+        public static SessionXmlFileSource Sessions { get { return sessions; } }
         public static BindingList<LayoutData> Layouts { get { return layouts; } }
         public static CommandLineOptions CommandLine { get; private set; }
         public static ImageList Images { get; private set; }
