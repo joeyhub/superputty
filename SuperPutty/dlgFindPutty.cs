@@ -399,7 +399,6 @@ namespace SuperPutty
                 if (OrigSettingsFolder != SuperPuTTY.Settings.SettingsFolder)
                 {
                     SuperPuTTY.LoadLayouts();
-                    // Note: The whole treeview will need to be reloaded. An event needs to be made for this.
                     SuperPuTTY.LoadSessions();
                 }
                 else if (OrigDefaultLayoutName != SuperPuTTY.Settings.DefaultLayoutName)

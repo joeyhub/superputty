@@ -27,6 +27,7 @@ namespace SuperPutty
 
         public static event EventHandler<LayoutChangedEventArgs> LayoutChanging;
         public static event EventHandler<LayoutChangedEventArgs> LayoutChanged;
+        public static event EventHandler SessionsLoaded;
 
         public static event Action<String> StatusEvent;
 
@@ -309,6 +310,10 @@ namespace SuperPutty
             try
             {
                 sessions = new SessionXmlFileSource(SessionSource.ROOT_NAME, SessionsFileName);
+                sessions.Load();
+
+                if (SessionsLoaded != null)
+                    SessionsLoaded(typeof(SuperPuTTY), null);
             }
             catch (Exception ex)
             {

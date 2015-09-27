@@ -59,15 +59,6 @@ namespace SuperPutty
         {
             InitializeComponent();
 
-            if (SuperPuTTY.Settings.OpenSessionWith != null)
-                foreach(KeyValuePair<string, Properties.Setting.OpenWith> entry in SuperPuTTY.Settings.OpenSessionWith)
-                {
-                    ToolStripMenuItem menuItem = new ToolStripMenuItem();
-                    menuItem.Text = entry.Key;
-                    menuItem.Click += new EventHandler(this.OpenWithToolStripMenuItem_Click);
-                    this.toolStripMenuItem4.DropDownItems.Add(menuItem);
-                }
-
             this.treeView1.TreeViewNodeSorter = this;
             
             if (SuperPuTTY.Images != null)
@@ -81,6 +72,7 @@ namespace SuperPutty
             this.LoadSessions();
             this.treeView1.EndUpdate();
             SuperPuTTY.Settings.SettingsSaving += new SettingsSavingEventHandler(Settings_SettingsSaving);
+            SuperPuTTY.SessionsLoaded += new EventHandler(this.LoadedSessions);
         }
 
         void ExpandInitialTree()
@@ -112,6 +104,20 @@ namespace SuperPutty
 
         void ApplySettings()
         {
+            if (SuperPuTTY.Settings.OpenSessionWith != null)
+            {
+                // Note: I hope this garbage collects the events appropriately.
+                this.toolStripMenuItem4.DropDownItems.Clear();
+
+                foreach (KeyValuePair<string, Properties.Setting.OpenWith> entry in SuperPuTTY.Settings.OpenSessionWith)
+                {
+                    ToolStripMenuItem menuItem = new ToolStripMenuItem();
+                    menuItem.Text = entry.Key;
+                    menuItem.Click += new EventHandler(this.OpenWithToolStripMenuItem_Click);
+                    this.toolStripMenuItem4.DropDownItems.Add(menuItem);
+                }
+            }
+
             this.treeView1.ShowLines = SuperPuTTY.Settings.SessionsTreeShowLines;
             this.treeView1.Font = SuperPuTTY.Settings.SessionsTreeFont;
             this.panelSearch.Visible = SuperPuTTY.Settings.SessionsShowSearch;
@@ -133,6 +139,11 @@ namespace SuperPutty
             treeView1.Nodes.Add(this.nodeRoot);
             this.nodeRoot.ContextMenuStrip = this.contextMenuStripFolder;
             ExpandInitialTree();
+        }
+
+        private void LoadedSessions(object sender, EventArgs e)
+        {
+            this.LoadSessions();
         }
 
         /// <summary>
