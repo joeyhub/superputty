@@ -477,9 +477,23 @@ namespace SuperPutty
         private void contextMenuStripFolder_Opening(object sender, CancelEventArgs e)
         {
             bool isRootNode = this.treeView1.SelectedNode != this.nodeRoot;
-            this.reloadToolStripMenuItem.Enabled = this.treeView1.SelectedNode is SourceTreeNode;
+            this.reloadToolStripMenuItem.Enabled = false;
+            bool isSourceNode = this.treeView1.SelectedNode is SourceTreeNode;
+
+            if (isSourceNode)
+            {
+                SessionSource session = ((SourceTreeNode)this.treeView1.SelectedNode).Session;
+
+                if(session.Guid != null)
+                    this.reloadToolStripMenuItem.Text = "Load";
+                else
+                    this.reloadToolStripMenuItem.Text = "Reload";
+
+                this.reloadToolStripMenuItem.Enabled = true;
+            }
+
             this.renameToolStripMenuItem.Enabled = isRootNode;
-            this.copyFolderToolStripMenuItem.Enabled = isRootNode;
+            this.copyFolderToolStripMenuItem.Enabled = isRootNode && !isSourceNode;
             this.removeFolderToolStripMenuItem.Enabled = isRootNode;
         }
 
