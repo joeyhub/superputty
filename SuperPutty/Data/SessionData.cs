@@ -491,6 +491,12 @@ namespace SuperPutty.Data
         {
         }
 
+        /// <summary>
+        /// This constructor is to be used when the user creates a new source node from a writable source.
+        /// It will create a GUID to prevent circular references.
+        /// </summary>
+        /// <param name="name">The name of the node for display purposes.</param>
+        /// <param name="source">The source. The inheriting class should make use of this as the location of its data source.</param>
         public SessionSource(string name, string source) : base(name)
         {
             this.Guid = System.Guid.NewGuid().ToString();
