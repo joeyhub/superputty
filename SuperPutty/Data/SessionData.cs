@@ -205,7 +205,6 @@ namespace SuperPutty.Data
     [XmlRoot("Folder")]
     public class SessionNode : SessionData, IComparable, ICloneable
     {
-
         [XmlArray("Children")]
         [XmlArrayItem(typeof(SessionNode), ElementName = "Folder")]
         [XmlArrayItem(typeof(SessionSource), ElementName = "Source")]
@@ -230,6 +229,16 @@ namespace SuperPutty.Data
         public SessionNode(string name) : base(name)
         {
             this.Initialise();
+        }
+
+        public virtual bool ShouldSerializeChildren()
+        {
+            return true;
+        }
+
+        public virtual bool ShouldSerializeIncrement()
+        {
+            return true;
         }
 
         public void AddChild(SessionData child)
@@ -444,6 +453,12 @@ namespace SuperPutty.Data
         [XmlIgnore]
         public string Guid;
 
+        [XmlIgnore]
+        public override BindingList<SessionData> Children { get; set; }
+
+        [XmlIgnore]
+        public override int Increment { get; set; }
+
         // Note: Registry does not check for node existance.
         protected static Dictionary<string, SessionSource> Sources = new Dictionary<string, SessionSource>();
 
@@ -482,6 +497,16 @@ namespace SuperPutty.Data
             this.Source = source;
         }
 
+        public override bool ShouldSerializeChildren()
+        {
+            return false;
+        }
+
+        public override bool ShouldSerializeIncrement()
+        {
+            return false;
+        }
+
         public void OnLoaded()
         {
             if (this.Loaded != null)
@@ -497,12 +522,6 @@ namespace SuperPutty.Data
     public class SessionXmlFileSource : SessionSource
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SessionXmlFileSource));
-
-        [XmlIgnore]
-        public override BindingList<SessionData> Children { get; set; }
-
-        [XmlIgnore]
-        public override int Increment { get; set; }
 
         public SessionXmlFileSource() : base()
         {
