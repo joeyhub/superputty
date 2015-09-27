@@ -92,6 +92,7 @@
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\KeyboardShortcut.cs" />
+    <Compile Include="Data\Sources\WindowsNetwork.cs" />
     <Compile Include="dlgScriptEditor.cs">
       <SubType>Form</SubType>
     </Compile>
