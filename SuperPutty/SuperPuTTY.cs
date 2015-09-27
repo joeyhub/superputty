@@ -49,6 +49,7 @@ namespace SuperPutty
             SingleInstanceHelper.RegisterRemotingService();
             WindowEvents = new GlobalWindowEvents();
             WorkaroundCygwinBug();
+            Images = LoadImageList("default");
 
             if (!SuperPuTTY.IsFirstRun)
             {
@@ -64,7 +65,7 @@ namespace SuperPutty
                     }
                 }
 
-                // load data
+                // load data                
                 LoadLayouts();
                 Images = LoadImageList("default");
 

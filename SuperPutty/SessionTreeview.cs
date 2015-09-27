@@ -69,7 +69,12 @@ namespace SuperPutty
                 }
 
             this.treeView1.TreeViewNodeSorter = this;
-            this.treeView1.ImageList = SuperPuTTY.Images;
+            
+            if (SuperPuTTY.Images != null)
+            {
+                this.treeView1.ImageList = SuperPuTTY.Images;
+            }
+            
             this.treeNodeFactory = new TreeNodeFactory(this.treeView1.ImageList, this.contextMenuStripFolder, this.contextMenuStripAddTreeItem);
             this.ApplySettings();
             this.treeView1.BeginUpdate();
