@@ -200,13 +200,19 @@ namespace SuperPutty.Data
         }
     }
 
+    [XmlInclude(typeof(SessionSource)), XmlInclude(typeof(SessionRoot))]
     [XmlType("SessionNode")]
     [XmlRoot("Folder")]
     public class SessionNode : SessionData, IComparable, ICloneable
     {
+
+        [XmlArray("Children")]
         [XmlArrayItem(typeof(SessionNode), ElementName = "Folder")]
+        [XmlArrayItem(typeof(SessionSource), ElementName = "Source")]
+        [XmlArrayItem(typeof(SessionXmlFileSource), ElementName = "XmlFile")]
         [XmlArrayItem(typeof(SessionLeaf), ElementName = "Session")]
         public virtual BindingList<SessionData> Children { get; set; }
+
         [XmlAttribute]
         public virtual int Increment { get; set; }
 
@@ -237,6 +243,9 @@ namespace SuperPutty.Data
         {
             child.Parent = null;
             this.Children.Remove(child);
+
+            if (child is SessionSource)
+                SessionSource.Unregister((SessionSource)child);
         }
 
         public long GetCount()
@@ -410,13 +419,66 @@ namespace SuperPutty.Data
         }
     }
 
+    [XmlType("SessionRoot")]
+    [XmlRoot("Root")]
+    public class SessionRoot : SessionNode
+    {
+        [XmlAttribute]
+        public string Guid;
+
+        public SessionRoot() : base()
+        {
+        }
+
+        public SessionRoot(string name) : base(name)
+        {
+            this.Guid = System.Guid.NewGuid().ToString();
+        }
+    }
+
+    [XmlInclude(typeof(SessionXmlFileSource))]
+    [XmlType("SessionSource")]
+    [XmlRoot("Source")]
     public abstract class SessionSource : SessionNode
     {
+        [XmlIgnore]
+        public string Guid;
+
+        // Note: Registry does not check for node existance.
+        protected static Dictionary<string, SessionSource> Sources = new Dictionary<string, SessionSource>();
+
+        public static void Register(SessionSource source)
+        {
+            if(!SessionSource.Sources.ContainsKey(source.Guid))
+                SessionSource.Sources.Add(source.Guid, source);
+        }
+
+        public static void Unregister(SessionSource source)
+        {
+            // Note: This means the source has not been loaded, or something worse.
+            if (source.Guid == null)
+                return;
+
+            SessionSource.Sources.Remove(source.Guid);
+        }
+
+        public static bool IsRegistered(SessionSource source)
+        {
+            // Warning: This is deceptive. This permits reloading.
+            return SessionSource.Sources.ContainsKey(source.Guid) && SessionSource.Sources[source.Guid] != source;
+        }
+
+        [XmlAttribute]
         public string Source;
         public event EventHandler Loaded;
 
+        public SessionSource() : base()
+        {
+        }
+
         public SessionSource(string name, string source) : base(name)
         {
+            this.Guid = System.Guid.NewGuid().ToString();
             this.Source = source;
         }
 
@@ -430,14 +492,21 @@ namespace SuperPutty.Data
         public abstract void Load();
     }
 
+    [XmlType("SessionXmlFileSource")]
+    [XmlRoot("XmlFile")]
     public class SessionXmlFileSource : SessionSource
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(SessionXmlFileSource));
 
         [XmlIgnore]
         public override BindingList<SessionData> Children { get; set; }
+
         [XmlIgnore]
         public override int Increment { get; set; }
+
+        public SessionXmlFileSource() : base()
+        {
+        }
 
         public SessionXmlFileSource(string name, string source) : base(name, source)
         {
@@ -445,17 +514,27 @@ namespace SuperPutty.Data
 
         public override void Load()
         {
-            SessionNode root = LoadSessionsFromFile(this.Source, this.Name);
+            SessionRoot root = LoadSessionsFromFile(this.Source, this.Name);
 
             if (root == null)
                 return;
 
+            this.Guid = root.Guid;
+
+            if(SessionSource.IsRegistered(this))
+            {
+                this.Remove();
+                Log.WarnFormat("Removed {0} due to circular reference.", this.Guid);
+                return;
+            }
+
             this.Increment = root.Increment;
             this.Children = root.Children;
 
-            foreach(SessionData child in this.Children)
+            foreach (SessionData child in this.Children)
                 child.Parent = this;
 
+            SessionSource.Register(this);
             this.OnLoaded();
         }
 
@@ -466,7 +545,7 @@ namespace SuperPutty.Data
             if (this.IsDirty)
                 return;
 
-            if(this.WaitAfterSave != null)
+            if (this.WaitAfterSave != null)
             {
                 Log.InfoFormat("Delaying save for {0}", this.Source);
                 this.IsDirty = true;
@@ -490,7 +569,7 @@ namespace SuperPutty.Data
 
         private void WaitedAfterSave(object sender, EventArgs e)
         {
-            if(this.IsDirty)
+            if (this.IsDirty)
             {
                 Log.InfoFormat("Delayed save for {0}", this.Source);
                 this.RealSave(this.Source);
@@ -503,27 +582,28 @@ namespace SuperPutty.Data
 
         private void RealSave(string fileName)
         {
-            SessionNode root = new SessionNode(this.Name);
+            SessionRoot root = new SessionRoot(this.Name);
             root.Children = this.Children;
             root.Increment = this.Increment;
+            root.Guid = this.Guid;
             root.Id = this.Id;
             SaveSessionsToFile(root, fileName);
             this.IsDirty = false;
         }
 
-        public static SessionNode LoadSessionsFromFile(string fileName, string name)
+        public static SessionRoot LoadSessionsFromFile(string fileName, string name)
         {
-            SessionNode root = null;
-            SessionNode empty = new SessionNode(name);
+            SessionRoot root = null;
+            SessionRoot empty = new SessionRoot(name);
 
             if (File.Exists(fileName))
             {
                 XmlSerializer s = new XmlSerializer(empty.GetType());
                 using (TextReader r = new StreamReader(fileName))
                 {
-                    root = (SessionNode)s.Deserialize(r);
+                    root = (SessionRoot)s.Deserialize(r);
                 }
-                Log.InfoFormat("Loaded sessions from {1}", fileName);
+                Log.InfoFormat("Loaded sessions from {0}", fileName);
             }
             else
             {

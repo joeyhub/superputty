@@ -49,6 +49,8 @@
             this.newSessionToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.newFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newNormalFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newXmlFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
@@ -62,8 +64,8 @@
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
-            this.newNormalFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newXmlFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuStripAddTreeItem.SuspendLayout();
             this.contextMenuStripFolder.SuspendLayout();
             this.panelSearch.SuspendLayout();
@@ -211,11 +213,13 @@
             this.toolStripMenuItem3,
             this.connectAllToolStripMenuItem,
             this.toolStripMenuItem2,
+            this.reloadToolStripMenuItem,
+            this.toolStripSeparator5,
             this.expandAllToolStripMenuItem,
             this.collapseAllToolStripMenuItem});
             this.contextMenuStripFolder.Name = "contextMenuStripAddTreeItem";
             this.contextMenuStripFolder.ShowImageMargin = false;
-            this.contextMenuStripFolder.Size = new System.Drawing.Size(129, 226);
+            this.contextMenuStripFolder.Size = new System.Drawing.Size(129, 254);
             this.contextMenuStripFolder.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripFolder_Opening);
             // 
             // newSessionToolStripMenuItem1
@@ -238,6 +242,20 @@
             this.newFolderToolStripMenuItem.Name = "newFolderToolStripMenuItem";
             this.newFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.newFolderToolStripMenuItem.Text = "New Folder";
+            // 
+            // newNormalFolderToolStripMenuItem
+            // 
+            this.newNormalFolderToolStripMenuItem.Name = "newNormalFolderToolStripMenuItem";
+            this.newNormalFolderToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.newNormalFolderToolStripMenuItem.Text = "Normal";
+            this.newNormalFolderToolStripMenuItem.Click += new System.EventHandler(this.newNormalFolderToolStripMenuItem_Click);
+            // 
+            // newXmlFileFolderToolStripMenuItem
+            // 
+            this.newXmlFileFolderToolStripMenuItem.Name = "newXmlFileFolderToolStripMenuItem";
+            this.newXmlFileFolderToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+            this.newXmlFileFolderToolStripMenuItem.Text = "XML File";
+            this.newXmlFileFolderToolStripMenuItem.Click += new System.EventHandler(this.newXmlFileFolderToolStripMenuItem_Click);
             // 
             // copyFolderToolStripMenuItem
             // 
@@ -349,18 +367,17 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
-            // newNormalFolderToolStripMenuItem
+            // reloadToolStripMenuItem
             // 
-            this.newNormalFolderToolStripMenuItem.Name = "newNormalFolderToolStripMenuItem";
-            this.newNormalFolderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.newNormalFolderToolStripMenuItem.Text = "Normal";
-            this.newNormalFolderToolStripMenuItem.Click += new System.EventHandler(newNormalFolderToolStripMenuItem_Click);
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
+            this.reloadToolStripMenuItem.Text = "Reload";
+            this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
             // 
-            // newXmlFileFolderToolStripMenuItem
+            // toolStripSeparator5
             // 
-            this.newXmlFileFolderToolStripMenuItem.Name = "newXmlFileFolderToolStripMenuItem";
-            this.newXmlFileFolderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.newXmlFileFolderToolStripMenuItem.Text = "XML File";
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(125, 6);
             // 
             // SessionTreeview
             // 
@@ -421,5 +438,7 @@
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newNormalFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newXmlFileFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
     }
 }

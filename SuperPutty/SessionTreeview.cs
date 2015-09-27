@@ -331,6 +331,42 @@ namespace SuperPutty
             }
         }
 
+        private void newXmlFileFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = this.treeView1.SelectedNode;
+            if (node != null && node is FolderTreeNode)
+            {
+                dlgRenameItem dialog = new dlgRenameItem();
+                dialog.Text = "New XML File Folder";
+                dialog.ItemName = "New XML File Folder";
+                dialog.DetailName = "";
+                SessionNode parent = (((FolderTreeNode)node).Session);
+                dialog.ItemNameValidator = delegate(string txt, out string error)
+                {
+                    error = String.Empty;
+                    return true;
+                };
+                
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    OpenFileDialog openDialog = new OpenFileDialog();
+                    openDialog.Filter = "XML Files|*.xml|All files|*.*";
+                    openDialog.InitialDirectory = SuperPuTTY.Settings.SettingsFolder;
+                    openDialog.CheckFileExists = false;
+
+                    if (openDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        if (!String.IsNullOrEmpty(openDialog.FileName))
+                        {
+                            SessionNode session = new SessionXmlFileSource(dialog.ItemName, openDialog.FileName);
+                            parent.AddChild(session);
+                            session.GetSourceNode().Save();
+                        }
+                    }
+                }
+            }
+        }
+
         private void copyFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FolderTreeNode node = (FolderTreeNode)this.treeView1.SelectedNode;
@@ -378,6 +414,12 @@ namespace SuperPutty
                     session.GetSourceNode().Save();
                 }
             }
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SourceTreeNode node = (SourceTreeNode)this.treeView1.SelectedNode;
+            node.Session.Load();
         }
 
         private void removeFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -430,6 +472,7 @@ namespace SuperPutty
         private void contextMenuStripFolder_Opening(object sender, CancelEventArgs e)
         {
             bool isRootNode = this.treeView1.SelectedNode != this.nodeRoot;
+            this.reloadToolStripMenuItem.Enabled = this.treeView1.SelectedNode is SourceTreeNode;
             this.renameToolStripMenuItem.Enabled = isRootNode;
             this.copyFolderToolStripMenuItem.Enabled = isRootNode;
             this.removeFolderToolStripMenuItem.Enabled = isRootNode;
@@ -573,9 +616,15 @@ namespace SuperPutty
                 target = target.Parent;
 
             SessionNode parent = ((FolderTreeNode)target).Session;
+            SessionSource source1 = session.GetSourceNode();
             session.Remove();
             parent.AddChild(session);
-            session.GetSourceNode().Save();
+            SessionSource source2 = session.GetSourceNode();
+
+            source1.Save();
+
+            if (source1 != source2)
+                source2.Save();
 
             target.Expand();
         }

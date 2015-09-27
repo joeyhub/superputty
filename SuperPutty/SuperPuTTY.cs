@@ -441,8 +441,14 @@ namespace SuperPutty
             if (File.Exists(fileName))
             {
                 Log.InfoFormat("Importing sessions from file, path={0}", fileName);
-                SessionNode sessions = SessionXmlFileSource.LoadSessionsFromFile(fileName, "Imported");
-                Sessions.Import(sessions);
+                SessionRoot sessions = SessionXmlFileSource.LoadSessionsFromFile(fileName, "Imported");
+                // Note: This kludge could be improved.
+                SessionNode dummy = new SessionNode("Imported");
+
+                foreach(SessionData child in sessions.Children)
+                    dummy.AddChild(child);
+
+                Sessions.Import(dummy);
             }
         }
 

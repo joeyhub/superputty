@@ -34,7 +34,7 @@ namespace SuperPutty.Properties {
 
         protected override void OnSettingsLoaded(object sender, System.Configuration.SettingsLoadedEventArgs e)
         {
-            Log.InfoFormat("Settings Loaded");
+            Log.Info("Settings Loaded");
             base.OnSettingsLoaded(sender, e);
 
             PortableSettingsProvider provider = e.Provider as PortableSettingsProvider;
@@ -52,7 +52,7 @@ namespace SuperPutty.Properties {
         
         private void SettingsSavingEventHandler(object sender, System.ComponentModel.CancelEventArgs e) {
             // Add code to handle the SettingsSaving event here.
-            Log.InfoFormat("Settings Saved");
+            Log.Info("Settings Saved");
         }
 
         /// <summary>
