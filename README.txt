@@ -1,3 +1,5 @@
+THIS IS AN EXPERIMENTAL BRANCH. THE DATA FORMAT IS SUBJECT TO CHANGE. USE AT YOUR OWN PERIL.
+
 This is the README for the SuperPutty Application
 
 For License information please read the License.txt included with the download

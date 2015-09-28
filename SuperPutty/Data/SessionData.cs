@@ -34,6 +34,7 @@ using System.IO;
 using System.Collections;
 using System.Reflection;
 using System.Timers;
+using SuperPutty.Data.Sources;
 
 namespace SuperPutty.Data
 {
@@ -415,7 +416,9 @@ namespace SuperPutty.Data
         }
     }
 
-    [XmlInclude(typeof(SessionXmlFileSource))]
+    [XmlInclude(typeof(SessionXmlFileSource)),
+    XmlInclude(typeof(SessionWindowsNetworkSource)),
+    XmlInclude(typeof(SessionActiveDirectorySource))]
     [XmlType("SessionSource")]
     [XmlRoot("Source")]
     public abstract class SessionSource : SessionNode
@@ -662,6 +665,8 @@ namespace SuperPutty.Data
         }
     }
 
+    [XmlInclude(typeof(Sources.SessionWindowsNetworkLeaf)),
+    XmlInclude(typeof(Sources.SessionActiveDirectoryLeaf))]
     [XmlType("SessionLeaf")]
     [XmlRoot("Session")]
     public class SessionLeaf : SessionData, IComparable, ICloneable

@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using log4net;
 using SuperPutty.Data;
+using SuperPutty.Data.Sources;
 using SuperPutty.Utils;
 using WeifenLuo.WinFormsUI.Docking;
 using SuperPutty.Gui;
@@ -383,6 +384,56 @@ namespace SuperPutty
             }
         }
 
+        private void newWindowsNetworkFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = this.treeView1.SelectedNode;
+            if (node != null && node is FolderTreeNode)
+            {
+                dlgRenameItem dialog = new dlgRenameItem();
+                dialog.Text = "New Windows Network Folder";
+                dialog.ItemName = "New Windows Network Folder";
+                dialog.DetailName = "";
+                SessionNode parent = (((FolderTreeNode)node).Session);
+                dialog.ItemNameValidator = delegate(string txt, out string error)
+                {
+                    error = String.Empty;
+                    return true;
+                };
+
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    SessionNode session = new SessionWindowsNetworkSource(dialog.ItemName, null);
+                    parent.AddChild(session);
+                    session.GetSourceNode().Save();
+                }
+            }
+        }
+
+        private void newActiveDirectoryFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode node = this.treeView1.SelectedNode;
+            if (node != null && node is FolderTreeNode)
+            {
+                dlgRenameItem dialog = new dlgRenameItem();
+                dialog.Text = "New Active Directory Folder";
+                dialog.ItemName = "New Active Directory Folder";
+                dialog.DetailName = "";
+                SessionNode parent = (((FolderTreeNode)node).Session);
+                dialog.ItemNameValidator = delegate(string txt, out string error)
+                {
+                    error = String.Empty;
+                    return true;
+                };
+
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    SessionNode session = new SessionActiveDirectorySource(dialog.ItemName, null);
+                    parent.AddChild(session);
+                    session.GetSourceNode().Save();
+                }
+            }
+        }
+
         private void copyFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FolderTreeNode node = (FolderTreeNode)this.treeView1.SelectedNode;
@@ -487,13 +538,15 @@ namespace SuperPutty
 
         private void contextMenuStripFolder_Opening(object sender, CancelEventArgs e)
         {
-            bool isRootNode = this.treeView1.SelectedNode != this.nodeRoot;
+            DataTreeNode node = (DataTreeNode)this.treeView1.SelectedNode;
+            bool isRootNode = this.treeView1.SelectedNode == this.nodeRoot;
             this.reloadToolStripMenuItem.Enabled = false;
             bool isSourceNode = this.treeView1.SelectedNode is SourceTreeNode;
+            bool isReadOnly = node.Session.IsReadOnly;
 
             if (isSourceNode)
             {
-                SessionSource session = ((SourceTreeNode)this.treeView1.SelectedNode).Session;
+                SessionSource session = ((SourceTreeNode)node).Session;
 
                 if(session.Guid != null)
                     this.reloadToolStripMenuItem.Text = "Load";
@@ -503,9 +556,10 @@ namespace SuperPutty
                 this.reloadToolStripMenuItem.Enabled = true;
             }
 
-            this.renameToolStripMenuItem.Enabled = isRootNode;
-            this.copyFolderToolStripMenuItem.Enabled = isRootNode && !isSourceNode;
-            this.removeFolderToolStripMenuItem.Enabled = isRootNode;
+            this.newActiveDirectoryFolderToolStripMenuItem.Enabled = !isReadOnly;
+            this.renameToolStripMenuItem.Enabled = !(isRootNode || isReadOnly);
+            this.copyFolderToolStripMenuItem.Enabled = !(isRootNode || isSourceNode || isReadOnly);
+            this.removeFolderToolStripMenuItem.Enabled = !(isRootNode || isReadOnly);
         }
 
         private void contextMenuStripAddTreeItem_Opening(object sender, CancelEventArgs e)
@@ -580,7 +634,7 @@ namespace SuperPutty
             DataTreeNode node = e.Item as DataTreeNode;
 
             // Start the drag-and-drop operation with a cloned copy of the node.
-            if (node != null && node != this.nodeRoot)
+            if (node != null && node != this.nodeRoot && !node.Session.IsReadOnly)
             {
                 this.treeView1.DoDragDrop(new TreeNodeDroppabble(node), DragDropEffects.Copy);
             }
