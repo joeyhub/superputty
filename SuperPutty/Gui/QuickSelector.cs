@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 using log4net;
 
 namespace SuperPutty.Gui
@@ -13,8 +14,6 @@ namespace SuperPutty.Gui
     public partial class QuickSelector : Form
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(QuickSelector));
-        private static char[] sanitizeChars = { '*', '[', ',' };
-        private static char[] splitChars = { ' ', '.', '*' };
 
         public QuickSelector()
         {
@@ -53,59 +52,32 @@ namespace SuperPutty.Gui
 
         string FormatFilterString(string text)
         {
-            string filter = "";
+            // Stay safe, look both ways.
+            Regex rSplit = new Regex("(?<![^,](,,)*,),(?!,)");
+            Regex rEscape = new Regex("(?<!^)[*%](?!$)");
 
-            int i = 0;
-            int tokenCount = cleanTokens(text.Split(splitChars)).Length;
+            string[] tokens = rSplit.Split(text);
+            List<string> filters = new List<string>();
 
-            foreach (string token in cleanTokens(text.Split(splitChars)))
+            for(int i = 0; i < tokens.Length; i++)
             {
-                if (i > 0 && i < tokenCount)
-                {
-                    filter += " AND ";
-                }
+                string token = tokens[i].Replace(",,", ",");
+                token = token.Replace("[", "[[]");
+                token = rEscape.Replace(token, "[$0]");
+                token = token.Replace("'", "''");
 
-                filter += string.Format("([Name] LIKE '%{0}%' OR [Detail] LIKE '%{0}%')", tokenSanitize(token));
+                if (token == String.Empty)
+                    continue;
 
-                i++;
+                string format = "([Name] LIKE '{0}' OR [Detail] LIKE '{0}')";
+
+                if (i == 0)
+                    format = "([Name] LIKE '{0}*' OR [Detail] LIKE '{0}*')";
+
+                filters.Add(String.Format(format, token));
             }
 
-            return filter;
-        }
-
-        string[] cleanTokens(string[] tokens)
-        {
-            int i = 0;
-            foreach (string token in tokens)
-            {
-                if (token.Length > 0)
-                {
-                    i++;
-                }
-            }
-
-            string[] result = new string[i];
-
-            i = 0;
-            foreach(string token in tokens)
-            {
-                if (token.Length > 0)
-                {
-                    result[i] = token;
-                    i++;
-                }
-            }
-            return result;
-        }
-
-        string tokenSanitize(string token)
-        {
-            foreach (char sanitizeChar in sanitizeChars)
-            {
-                token = token.Replace(Convert.ToString(sanitizeChar), "");
-            }
-
-            return token;
+            return String.Join(" AND ", filters.ToArray());
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
