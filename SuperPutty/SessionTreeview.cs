@@ -29,7 +29,6 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using log4net;
 using SuperPutty.Data;
-using SuperPutty.Data.Sources;
 using SuperPutty.Utils;
 using WeifenLuo.WinFormsUI.Docking;
 using SuperPutty.Gui;
@@ -343,92 +342,6 @@ namespace SuperPutty
                 {
                     SessionNode session = new SessionNode(dialog.ItemName);
                     (((FolderTreeNode)node).Session).AddChild(session);
-                    session.GetSourceNode().Save();
-                }
-            }
-        }
-
-        private void newXmlFileFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TreeNode node = this.treeView1.SelectedNode;
-            if (node != null && node is FolderTreeNode)
-            {
-                dlgRenameItem dialog = new dlgRenameItem();
-                dialog.Text = "New XML File Folder";
-                dialog.ItemName = "New XML File Folder";
-                dialog.DetailName = "";
-                SessionNode parent = (((FolderTreeNode)node).Session);
-                dialog.ItemNameValidator = delegate(string txt, out string error)
-                {
-                    error = String.Empty;
-                    return true;
-                };
-                
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    OpenFileDialog openDialog = new OpenFileDialog();
-                    openDialog.Filter = "XML Files|*.xml|All files|*.*";
-                    openDialog.InitialDirectory = SuperPuTTY.Settings.SettingsFolder;
-                    openDialog.CheckFileExists = false;
-
-                    if (openDialog.ShowDialog(this) == DialogResult.OK)
-                    {
-                        if (!String.IsNullOrEmpty(openDialog.FileName))
-                        {
-                            SessionNode session = new SessionXmlFileSource(dialog.ItemName, openDialog.FileName);
-                            parent.AddChild(session);
-                            session.GetSourceNode().Save();
-                        }
-                    }
-                }
-            }
-        }
-
-        private void newWindowsNetworkFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TreeNode node = this.treeView1.SelectedNode;
-            if (node != null && node is FolderTreeNode)
-            {
-                dlgRenameItem dialog = new dlgRenameItem();
-                dialog.Text = "New Windows Network Folder";
-                dialog.ItemName = "New Windows Network Folder";
-                dialog.DetailName = "";
-                SessionNode parent = (((FolderTreeNode)node).Session);
-                dialog.ItemNameValidator = delegate(string txt, out string error)
-                {
-                    error = String.Empty;
-                    return true;
-                };
-
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    SessionNode session = new SessionWindowsNetworkSource(dialog.ItemName, null);
-                    parent.AddChild(session);
-                    session.GetSourceNode().Save();
-                }
-            }
-        }
-
-        private void newActiveDirectoryFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TreeNode node = this.treeView1.SelectedNode;
-            if (node != null && node is FolderTreeNode)
-            {
-                dlgRenameItem dialog = new dlgRenameItem();
-                dialog.Text = "New Active Directory Folder";
-                dialog.ItemName = "New Active Directory Folder";
-                dialog.DetailName = "";
-                SessionNode parent = (((FolderTreeNode)node).Session);
-                dialog.ItemNameValidator = delegate(string txt, out string error)
-                {
-                    error = String.Empty;
-                    return true;
-                };
-
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    SessionNode session = new SessionActiveDirectorySource(dialog.ItemName, null);
-                    parent.AddChild(session);
                     session.GetSourceNode().Save();
                 }
             }

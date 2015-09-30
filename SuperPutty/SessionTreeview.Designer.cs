@@ -50,8 +50,6 @@
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.newActiveDirectoryFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newNormalFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newXmlFileFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newWindowsNetworkFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
@@ -67,7 +65,6 @@
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
-            this.activeDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripAddTreeItem.SuspendLayout();
             this.contextMenuStripFolder.SuspendLayout();
             this.panelSearch.SuspendLayout();
@@ -239,10 +236,7 @@
             // newActiveDirectoryFolderToolStripMenuItem
             // 
             this.newActiveDirectoryFolderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newNormalFolderToolStripMenuItem,
-            this.newXmlFileFolderToolStripMenuItem,
-            this.newWindowsNetworkFolderToolStripMenuItem,
-            this.activeDirectoryToolStripMenuItem});
+            this.newNormalFolderToolStripMenuItem});
             this.newActiveDirectoryFolderToolStripMenuItem.Name = "newActiveDirectoryFolderToolStripMenuItem";
             this.newActiveDirectoryFolderToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.newActiveDirectoryFolderToolStripMenuItem.Text = "New Folder";
@@ -250,23 +244,9 @@
             // newNormalFolderToolStripMenuItem
             // 
             this.newNormalFolderToolStripMenuItem.Name = "newNormalFolderToolStripMenuItem";
-            this.newNormalFolderToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.newNormalFolderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newNormalFolderToolStripMenuItem.Text = "Normal";
             this.newNormalFolderToolStripMenuItem.Click += new System.EventHandler(this.newNormalFolderToolStripMenuItem_Click);
-            // 
-            // newXmlFileFolderToolStripMenuItem
-            // 
-            this.newXmlFileFolderToolStripMenuItem.Name = "newXmlFileFolderToolStripMenuItem";
-            this.newXmlFileFolderToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.newXmlFileFolderToolStripMenuItem.Text = "XML File";
-            this.newXmlFileFolderToolStripMenuItem.Click += new System.EventHandler(this.newXmlFileFolderToolStripMenuItem_Click);
-            // 
-            // newWindowsNetworkFolderToolStripMenuItem
-            // 
-            this.newWindowsNetworkFolderToolStripMenuItem.Name = "newWindowsNetworkFolderToolStripMenuItem";
-            this.newWindowsNetworkFolderToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.newWindowsNetworkFolderToolStripMenuItem.Text = "Windows Network";
-            this.newWindowsNetworkFolderToolStripMenuItem.Click += new System.EventHandler(this.newWindowsNetworkFolderToolStripMenuItem_Click);
             // 
             // copyFolderToolStripMenuItem
             // 
@@ -390,13 +370,6 @@
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
-            // activeDirectoryToolStripMenuItem
-            // 
-            this.activeDirectoryToolStripMenuItem.Name = "activeDirectoryToolStripMenuItem";
-            this.activeDirectoryToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.activeDirectoryToolStripMenuItem.Text = "Active Directory";
-            this.activeDirectoryToolStripMenuItem.Click += new System.EventHandler(this.newActiveDirectoryFolderToolStripMenuItem_Click);
-            // 
             // SessionTreeview
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -455,10 +428,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem copyFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newNormalFolderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem newXmlFileFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem newWindowsNetworkFolderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem activeDirectoryToolStripMenuItem;
     }
 }
