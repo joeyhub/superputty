@@ -56,6 +56,8 @@ namespace SuperPutty
         private SessionLeaf m_Session;
         private PuttyClosedCallback m_ApplicationExit;
 
+        public IntPtr AppWindowHandle { get { return this.m_AppPanel.AppWindowHandle; } }
+
         public ctlPuttyPanel(SessionLeaf session, PuttyClosedCallback callback)
         {
             m_Session = session;

@@ -167,14 +167,10 @@ DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
             bool result = false;
             if (this.ExternalProcessCaptured && NativeMethods.GetForegroundWindow() != this.m_AppWin)
             {
-                //Log.InfoFormat("[{0}] ReFocusPuTTY - puttyTab={1}, caller={2}", this.m_AppWin, this.Parent.Text, caller);
                 settingForeground = true;
                 result = NativeMethods.SetForegroundWindow(this.m_AppWin);
                 Log.InfoFormat("[{0}] ReFocusPuTTY - puttyTab={1}, caller={2}, result={3}", this.m_AppWin, this.Parent.Text, caller, result);
             }
-            //return (this.m_AppWin != null
-            //    && NativeMethods.GetForegroundWindow() != this.m_AppWin
-            //    && !NativeMethods.SetForegroundWindow(this.m_AppWin));
 
             return result;
         }

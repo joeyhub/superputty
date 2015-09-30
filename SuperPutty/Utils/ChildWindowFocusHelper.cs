@@ -131,7 +131,8 @@ namespace SuperPutty.Utils
                             case 4:
                             case 32772:
                                 IntPtr current = NativeMethods.GetForegroundWindow();
-                                if (current != this.MainForm.Handle && !this.ContainsChild(current))
+                                bool hasCurrent = this.ContainsChild(current);
+                                if (current != this.MainForm.Handle && !hasCurrent)
                                 {
                                     m_externalWindow = true;
                                 } 
@@ -139,7 +140,9 @@ namespace SuperPutty.Utils
                                 {
                                     m_externalWindow = false;
                                     NativeMethods.BringWindowToTop(this.MainForm.Handle);
-                                    this.MainForm.FocusActiveDocument("SHELLHOOK");
+
+                                    if(!hasCurrent)
+                                        this.MainForm.FocusActiveDocument("SHELLHOOK");
                                     //return false;
                                 }
                                 else if (current == this.MainForm.Handle)
