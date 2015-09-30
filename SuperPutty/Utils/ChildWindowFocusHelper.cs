@@ -139,10 +139,12 @@ namespace SuperPutty.Utils
                                 else if (m_externalWindow)
                                 {
                                     m_externalWindow = false;
-                                    NativeMethods.BringWindowToTop(this.MainForm.Handle);
 
                                     if(!hasCurrent)
+                                    {
+                                        NativeMethods.BringWindowToTop(this.MainForm.Handle);
                                         this.MainForm.FocusActiveDocument("SHELLHOOK");
+                                    }
                                     //return false;
                                 }
                                 else if (current == this.MainForm.Handle)

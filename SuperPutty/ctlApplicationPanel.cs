@@ -215,6 +215,7 @@ DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
                     UpdateTitle();
                     break;
                 case (uint)NativeMethods.WinEvents.EVENT_SYSTEM_FOREGROUND:
+                    NativeMethods.BringWindowToTop(SuperPuTTY.MainForm.Handle);
                     UpdateForeground();
                     break;
             }
