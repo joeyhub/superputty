@@ -72,7 +72,7 @@ namespace SuperPutty.Gui
                 string format = "([Name] LIKE '{0}' OR [Detail] LIKE '{0}')";
 
                 if (i == 0)
-                    format = "([Name] LIKE '{0}*' OR [Detail] LIKE '{0}*')";
+                    format = "([Name] LIKE '*{0}*' OR [Detail] LIKE '{0}*')";
 
                 filters.Add(String.Format(format, token));
             }
