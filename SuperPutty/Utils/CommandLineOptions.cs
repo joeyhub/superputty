@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using SuperPutty.Data;
@@ -130,25 +131,19 @@ namespace SuperPutty.Utils
             SessionDataStartInfo ssi = null;
             if (this.SessionId != null)
             {
-                if (SessionData.IsStringIdValid(this.SessionId))
+                SessionLeaf session = SuperPuTTY.Sessions.GetByNamesString<SessionLeaf>(this.SessionId);
+
+                if (session == null)
                 {
-                    SessionLeaf session = SuperPuTTY.Sessions.GetByStringId(this.SessionId);
-                    if (session == null)
-                    {
-                        Log.WarnFormat("Session from command line not found, id={0}", this.SessionId);
-                    }
-                    else
-                    {
-                        ssi = new SessionDataStartInfo
-                        {
-                            Session = session,
-                            UseScp = this.UseScp
-                        };
-                    }
+                    Log.WarnFormat("Session from command line not found, id={0}", this.SessionId);
                 }
                 else
                 {
-                    Log.WarnFormat("Invalid session format, id={0}", this.SessionId);
+                    ssi = new SessionDataStartInfo
+                    {
+                        Session = session,
+                        UseScp = this.UseScp
+                    };
                 }
             }
             else if (this.Host != null ||  this.PuttySession != null)
@@ -242,6 +237,43 @@ namespace SuperPutty.Utils
 
         public string Host { get; private set; }
         public bool Help { get; private set; }
+
+        /// <summary>
+        /// Quotes all arguments that contain whitespace, or begin with a quote and returns a single
+        /// argument string for use with Process.Start().
+        /// 
+        /// Source: http://csharptest.net/529/how-to-correctly-escape-command-line-arguments-in-c/
+        /// </summary>
+        /// <param name="args">A list of strings for arguments, may not contain null, '\0', '\r', or '\n'</param>
+        /// <returns>The combined list of escaped/quoted strings</returns>
+        /// <exception cref="System.ArgumentNullException">Raised when one of the arguments is null</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Raised if an argument contains '\0', '\r', or '\n'</exception>
+        public static string EscapeArguments(params string[] args)
+        {
+            StringBuilder arguments = new StringBuilder();
+            Regex invalidChar = new Regex("[\x00\x0a\x0d]");//  these can not be escaped
+            Regex needsQuotes = new Regex(@"\s|""");//          contains whitespace or two quote characters
+            Regex escapeQuote = new Regex(@"(\\*)(""|$)");//    one or more '\' followed with a quote or end of string
+            for (int carg = 0; args != null && carg < args.Length; carg++)
+            {
+                if (args[carg] == null) { throw new ArgumentNullException("args[" + carg + "]"); }
+                if (invalidChar.IsMatch(args[carg])) { throw new ArgumentOutOfRangeException("args[" + carg + "]"); }
+                if (args[carg] == String.Empty) { arguments.Append("\"\""); }
+                else if (!needsQuotes.IsMatch(args[carg])) { arguments.Append(args[carg]); }
+                else
+                {
+                    arguments.Append('"');
+                    arguments.Append(escapeQuote.Replace(args[carg], m =>
+                        m.Groups[1].Value + m.Groups[1].Value +
+                        (m.Groups[2].Value == "\"" ? "\\\"" : "")
+                    ));
+                    arguments.Append('"');
+                }
+                if (carg + 1 < args.Length)
+                    arguments.Append(' ');
+            }
+            return arguments.ToString();
+        }
 
     }
 }

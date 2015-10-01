@@ -24,7 +24,7 @@ namespace SuperPuttyUnitTests
             {
                 data.ItemData.AddItemDataRow(
                     sd.Name, 
-                    sd.GetFullPathToString(),
+                    sd.GetNamesString(),
                     sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black, sd);
             }
 

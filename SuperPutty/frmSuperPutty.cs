@@ -376,7 +376,7 @@ namespace SuperPutty
             {
                 data.ItemData.AddItemDataRow(
                     sd.Name,
-                    sd.GetFullPathToString(),
+                    sd.GetNamesString(),
                     sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black,
                     sd);
             }
@@ -406,7 +406,7 @@ namespace SuperPutty
                     SessionLeaf sd = panel.Session;
                     data.ItemData.AddItemDataRow(
                         panel.Text,
-                        sd.GetFullPathToString(),
+                        sd.GetNamesString(),
                         sd.Proto == ConnectionProtocol.Cygterm || sd.Proto == ConnectionProtocol.Mintty ? Color.Blue : Color.Black,
                         panel);
                 }
@@ -1084,7 +1084,7 @@ namespace SuperPutty
                     if (puttyPanel != null && this.sendCommandsDocumentSelector.IsDocumentSelected(puttyPanel))
                     {
                         int handle = puttyPanel.AppPanel.AppWindowHandle.ToInt32();
-                        Log.InfoFormat("SendCommand: session={0}, command=[{1}], handle={2}", puttyPanel.Session.GetFullPathToString(), command, handle);
+                        Log.InfoFormat("SendCommand: session={0}, command=[{1}], handle={2}", puttyPanel.Session.GetNamesString(), command, handle);
                         command.SendToTerminal(handle);
                         
                         sent++;

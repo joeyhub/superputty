@@ -43,7 +43,7 @@ namespace SuperPutty
                         string tabNum = pp == this.dockPanel.ActiveDocument ? i + "*" : i.ToString();
                         ListViewItem item = this.listViewDocs.Items.Add(tabNum);
                         item.SubItems.Add(new ListViewItem.ListViewSubItem(item, pp.Text));
-                        item.SubItems.Add(new ListViewItem.ListViewSubItem(item, pp.Session.GetFullPathToString()));
+                        item.SubItems.Add(new ListViewItem.ListViewSubItem(item, pp.Session.GetNamesString()));
                         item.SubItems.Add(new ListViewItem.ListViewSubItem(item, pp.GetHashCode().ToString()));
 
                         item.Selected = IsDocumentSelected(pp);

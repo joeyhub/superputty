@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -49,27 +50,197 @@ namespace SuperPutty.Data
         Mintty
     }
 
+    public enum ChangeType
+    {
+        Added, 
+        Removed
+    }
+
+    /// <summary>
+    /// This is a very lightweight class for storing a list of strings using a custom CSV style string.
+    /// 
+    /// This must be used on the command line so a string may not contain \0, \r, \n.
+    /// 
+    /// When using remote sources, take care of character sets which may create a security problem if a session is opened in a new instance.
+    /// 
+    /// The original intention was that a library with a common CSV protocol would be used.
+    /// 
+    /// This is not intended to write real CSV files and will not work with multiple line readers.
+    /// 
+    /// It is for concisely serialising a string representing a through a set of folders.
+    /// 
+    /// Although non-standard, the simplicity of this implementation has three key benefits.
+    /// 
+    /// 1. The legacy format is compatible with the reader for this format.
+    /// 2. Implementing this another language is trivial.
+    /// 3. It allows any character valid withint the character set to be used in a string.
+    /// 
+    /// If the user ensures that they never use the delimiter in their names, it will work with split and join.
+    /// 
+    /// Examples:
+    /// {"a", "b", "c"} => a/b/c
+    /// {"a/b", "c"} => a//b/c
+    /// </summary>
+    public class Csv
+    {
+        const char DELIMITER = '/';
+
+        /// <summary>
+        /// This method serializes a collection of strings into a CSV style string.
+        /// 
+        /// However, the default separator is a forward slash rather than a comma.
+        /// 
+        /// In the case of any error the response will be a null value.
+        /// 
+        /// The list passed must contain at least one item and no items can be null or empty.
+        /// 
+        /// If a string contains a delimiter it will be escaped with another delimiter.
+        /// 
+        /// An enquoted quote will be escaped with a quote.
+        /// 
+        /// No other characters are escaped including newlines.
+        /// </summary>
+        /// <param name="items">A list of strings.</param>
+        /// <returns>null on error otherwise a string representing the list.</returns>
+        public static string Write(ICollection<string> items)
+        {
+            if(items.Count == 0)
+                return null;
+
+            List<string> parts = new List<String>();
+            string D = DELIMITER.ToString();
+
+            foreach(string item in items)
+            {
+                if (item == null || item == "")
+                    return null;
+
+                if (item.Contains('\0') || item.Contains('\r') || item.Contains('\n'))
+                    return null;
+
+                parts.Add(item.Replace(D, D + D));
+            }
+
+            return String.Join(D, parts.ToArray());
+        }
+
+        /// <summary>
+        /// This method deserializes a string returned from Write back into a string list.
+        /// 
+        /// In the case of any error null will be returned.
+        /// 
+        /// This implementation uses a very basic state machine like implementation,
+        /// however it may also be implemented using regular expression with a look around.
+        /// </summary>
+        /// <param name="list">A string of one or more non-empty values separated by forward slash.</param>
+        /// <returns>null when there is an error otherwise the derserialized list of strings.</returns>
+        public static List<string> Read(string csv)
+        {
+            List<string> parts = new List<string>();
+            string state = null;
+            string current = "";
+
+            foreach(char c in csv)
+                switch(state)
+                {
+                    case null:
+                    case "part":
+                        if(c == DELIMITER)
+                        {
+                            state = "delimiter";
+                            break;
+                        }
+
+                        state = "part";
+                        current += c.ToString();
+                        break;
+                    case "delimiter":
+                        state = "part";
+
+                        if(c == DELIMITER)
+                        {
+                            current += c.ToString();
+                            break;
+                        }
+
+                        if(current == "")
+                            return null;
+
+                        parts.Add(current);
+                        current = c.ToString();
+                        break;
+                }
+
+            switch(state)
+            {
+                case null:
+                case "delimiter":
+                    return null;
+                case "part":
+                    parts.Add(current);
+                    break;
+            }
+
+            return parts;
+        }
+    }
+
+    public class ChangedEventArgs : EventArgs
+    {
+        public SessionData Item { get; private set; }
+        public ChangeType Type { get; private set; }
+
+        public ChangedEventArgs(ChangeType type, SessionData item)
+        {
+            this.Type = type;
+            this.Item = item;
+        }
+    }
+
+    public delegate void ChangedEventHandler(ChangedEventArgs e);
+
+    [XmlType("SessionChildren")]
+    [XmlRoot("Children")]
+    public class SessionChildren : KeyedCollection<string, SessionData>
+    {
+        public event ChangedEventHandler Changed;
+
+        public SessionChildren() : base(null, 0)
+        {
+        }
+
+        protected override string GetKeyForItem(SessionData item)
+        {
+            return item.Name;
+        }
+
+        protected override void InsertItem(int index, SessionData newItem)
+        {
+            base.InsertItem(index, newItem);
+
+            if (this.Changed != null)
+                this.Changed(new ChangedEventArgs(ChangeType.Added, newItem));
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            SessionData removedItem = Items[index];
+            base.RemoveItem(index);
+
+            if (this.Changed != null)
+                this.Changed(new ChangedEventArgs(ChangeType.Removed, removedItem));
+        }
+    }
+
     [XmlInclude(typeof(SessionNode)), XmlInclude(typeof(SessionLeaf))]
     public class SessionData
     {
         [XmlIgnore]
         public virtual bool IsReadOnly { get {return false;} }
 
-        public static string GetUniqueId()
-        {
-            return DateTime.Now.Ticks.ToString();
-        }
-
-        public static bool IsStringIdValid(string id)
-        {
-            return new Regex("^(([0-9]+)([.][0-9]+)*)?_[0-9]+$").IsMatch(id);
-        }
-
         [XmlAttribute]
         public string Name;
 
-        [XmlAttribute]
-        public virtual int Id { get;set; }
         [XmlIgnore]
         public SessionNode Parent;
 
@@ -81,7 +252,6 @@ namespace SuperPutty.Data
 
         public SessionData()
         {
-
         }
 
         public SessionData(string name)
@@ -104,28 +274,7 @@ namespace SuperPutty.Data
             return null;
         }
 
-        public List<int> GetIds()
-        {
-            SessionData current = this.Parent;
-            List<int> path = new List<int>();
-
-            while (current != null)
-            {
-                path.Add(current.Id);
-                current = current.Parent;
-            }
-
-            path.Reverse();
-            return path;
-        }
-
-        public string GetIdString()
-        {
-            string[] ids = Array.ConvertAll<int, string>(this.GetIds().ToArray(), x => x.ToString());
-            return String.Join(".", ids) + '_' + this.Id.ToString();
-        }
-
-        public List<string> GetFullPath()
+        public List<string> GetNames()
         {
             SessionData current = this;
             List<string> path = new List<string>();
@@ -140,9 +289,9 @@ namespace SuperPutty.Data
             return path;
         }
 
-        public string GetFullPathToString()
+        public string GetNamesString()
         {
-            return String.Join(" -> ", this.GetFullPath().ToArray());
+            return Csv.Write(this.GetNames());
         }
 
         public void Remove()
@@ -155,7 +304,7 @@ namespace SuperPutty.Data
         {
             foreach (FieldInfo pi in o.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
-                if (pi.Name == "Parent" || pi.Name == "Id" || pi.Name == "Children")
+                if (pi.Name == "Parent" || pi.Name == "Children")
                     continue;
 
                 pi.SetValue(o, pi.GetValue(this));
@@ -180,15 +329,11 @@ namespace SuperPutty.Data
         [XmlArrayItem(typeof(SessionSource), ElementName = "Source")]
         [XmlArrayItem(typeof(SessionXmlFileSource), ElementName = "XmlFile")]
         [XmlArrayItem(typeof(SessionLeaf), ElementName = "Session")]
-        public virtual BindingList<SessionData> Children { get; set; }
-
-        [XmlAttribute]
-        public virtual int Increment { get; set; }
+        public virtual SessionChildren Children { get; set; }
 
         private void Initialise()
         {
-            this.Children = new BindingList<SessionData>();
-            this.Increment = 0;
+            this.Children = new SessionChildren();
         }
 
         public SessionNode() : base()
@@ -206,14 +351,8 @@ namespace SuperPutty.Data
             return true;
         }
 
-        public virtual bool ShouldSerializeIncrement()
-        {
-            return true;
-        }
-
         public void AddChild(SessionData child)
         {
-            child.Id = this.Increment++;
             child.Parent = this;
             this.Children.Add(child);
         }
@@ -262,12 +401,14 @@ namespace SuperPutty.Data
             return children;
         }
 
-        public T GetFirstByName<T>(string name) where T : SessionData
+        public T GetByName<T>(string name) where T : SessionData
         {
-            foreach (SessionData child in this.Children)
+            if(this.Children.Contains(name))
             {
-                if (child is T && child.Name.Equals(name))
-                    return (T)child;
+                SessionData candidate = this.Children[name];
+
+                if (candidate is T)
+                    return (T)candidate;
             }
 
             return null;
@@ -290,7 +431,7 @@ namespace SuperPutty.Data
 
             foreach(string name in path)
             {
-                SessionNode next = current.GetFirstByName<SessionNode>(name);
+                SessionNode next = current.GetByName<SessionNode>(name);
 
                 if (next == null)
                 {
@@ -304,82 +445,41 @@ namespace SuperPutty.Data
             return current;
         }
 
-        public T GetById<T>(int id) where T : SessionData
-        {
-            foreach (SessionData child in this.Children)
-            {
-                if (child is T && child.Id == id)
-                    return (T)child;
-            }
-
-            return null;
-        }
-
         // Warning: Use this with duplicates at your own peril.
-        public SessionLeaf GetByNames(ICollection<string> node_names, string leaf_name)
+        public T GetByNames<T>(ICollection<string> node_names) where T : SessionData
         {
             SessionNode current = this;
+            int i;
 
-            foreach (string node_name in node_names)
+            for (i = 0; i < node_names.Count - 1; i++)
             {
-                current = current.GetFirstByName<SessionNode>(node_name);
+                current = current.GetByName<SessionNode>(node_names.ElementAt<string>(i));
 
                 if (current == null)
                     return null;
             }
 
-            return (SessionLeaf)current.GetFirstByName<SessionLeaf>(leaf_name);
+            return (T)current.GetByName<T>(node_names.ElementAt<string>(i));
         }
 
-        // Things like this could be made faster with an index.
-        public SessionLeaf GetByIds(ICollection<int> node_ids, int leaf_id)
+        public T GetByNamesString<T>(string csv) where T : SessionData
         {
-            SessionNode current = this;
-            bool first = true;
+            List<string> names = Csv.Read(csv);
 
-            if (this.Id != node_ids.ElementAt<int>(0))
+            if (names == null)
                 return null;
 
-            foreach (int node_id in node_ids)
-            {
-                if(first)
-                {
-                    first = false;
-                    continue;
-                }
-
-                current = current.GetById<SessionNode>(node_id);
-
-                if (current == null)
-                    return null;
-            }
-
-            return (SessionLeaf)current.GetById<SessionLeaf>(leaf_id);
+            return this.GetByNames<T>(names);
         }
 
-        public SessionLeaf GetByStringId(string id)
+        public void OnChange(ChangedEventHandler e)
         {
-            string[] parts = id.Split('_');
-            int[] ids = Array.ConvertAll<string, int>(parts[0].Split('.'), Int32.Parse);
-            return this.GetByIds(ids, Int32.Parse(parts[1]));
+            this.Children.Changed += e;
         }
 
-        public SessionLeaf GetByLegacyId(string id)
+        public void OffChange(ChangedEventHandler e)
         {
-            List<string> parts = new List<string>(id.Split('/'));
-            string name = parts[parts.Count - 1];
-            parts.RemoveAt(parts.Count - 1);
-            return this.GetByNames(parts, name);
-        }
-
-        public void OnChange(ListChangedEventHandler e)
-        {
-            this.Children.ListChanged += e;
-        }
-
-        public void OffChange(ListChangedEventHandler e)
-        {
-            this.Children.ListChanged -= e;
+            this.Children.Changed -= e;
         }
 
         public override object Clone()
@@ -424,12 +524,6 @@ namespace SuperPutty.Data
 
         [XmlIgnore]
         public string Guid;
-
-        [XmlIgnore]
-        public override BindingList<SessionData> Children { get; set; }
-
-        [XmlIgnore]
-        public override int Increment { get; set; }
 
         // Note: Registry does not check for node existance.
         protected static Dictionary<string, SessionSource> Sources = new Dictionary<string, SessionSource>();
@@ -480,11 +574,6 @@ namespace SuperPutty.Data
             return false;
         }
 
-        public override bool ShouldSerializeIncrement()
-        {
-            return false;
-        }
-
         public void OnLoaded()
         {
             if (this.Loaded != null)
@@ -525,7 +614,6 @@ namespace SuperPutty.Data
                 return;
             }
 
-            this.Increment = root.Increment;
             this.Children = root.Children;
 
             foreach (SessionData child in this.Children)
@@ -581,9 +669,7 @@ namespace SuperPutty.Data
         {
             SessionRoot root = new SessionRoot(this.Name);
             root.Children = this.Children;
-            root.Increment = this.Increment;
             root.Guid = this.Guid;
-            root.Id = this.Id;
             SaveSessionsToFile(root, fileName);
             this.IsDirty = false;
         }

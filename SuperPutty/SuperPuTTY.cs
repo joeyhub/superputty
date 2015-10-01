@@ -87,7 +87,7 @@ namespace SuperPutty
                         if (sessionStartInfo != null)
                         {
                             StartingSession = sessionStartInfo;
-                            Log.InfoFormat("Starting adhoc Session from command line, {0}", StartingSession.Session.GetFullPathToString());
+                            Log.InfoFormat("Starting adhoc Session from command line, {0}", StartingSession.Session.GetNamesString());
                         }
                     }
 
@@ -269,7 +269,7 @@ namespace SuperPutty
 
         public static void LoadSessionInNewInstance(SessionLeaf session)
         {
-            string args = "-session \"" + session.GetIdString() + "\"";
+            string args = "-session " + CommandLineOptions.EscapeArguments(session.GetNamesString());
             ReportStatus("Starting session in new instance, {0} ({1})", args, session.Name);
             Process.Start(Assembly.GetExecutingAssembly().Location, args);
         }
@@ -325,14 +325,14 @@ namespace SuperPutty
         /// <param name="session">The <seealso cref="SessionData"/> object containing the settings</param>
         public static void OpenPuttySession(SessionLeaf session)
         {
-            Log.InfoFormat("Opening putty session, id={0}", session == null ? "" : session.GetFullPathToString());
+            Log.InfoFormat("Opening putty session, id={0}", session == null ? "" : session.GetNamesString());
             if (session != null)
             {
                 ctlPuttyPanel sessionPanel = ctlPuttyPanel.NewPanel(session);
                 ApplyDockRestrictions(sessionPanel);
                 ApplyIconForWindow(sessionPanel, session);
                 sessionPanel.Show(MainForm.DockPanel, session.LastDockstate);
-                SuperPuTTY.ReportStatus("Opened session: {0} [{1}]", session.GetFullPathToString(), session.Proto);
+                SuperPuTTY.ReportStatus("Opened session: {0} [{1}]", session.GetNamesString(), session.Proto);
             }
         }
 
@@ -340,7 +340,7 @@ namespace SuperPutty
         /// <param name="session">The <seealso cref="SessionData"/> object containing the settings</param>
         public static void OpenScpSession(SessionLeaf session)
         {
-            string path = session == null ? "" : session.GetFullPathToString();
+            string path = session == null ? "" : session.GetNamesString();
             if (!IsScpEnabled)
             {
                 SuperPuTTY.ReportStatus("Could not open session, pscp not enabled, {0}.", path);

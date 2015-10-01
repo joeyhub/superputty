@@ -113,7 +113,7 @@ namespace SuperPutty
             this.m_AppPanel.ApplicationParameters = this.m_puttyStartInfo.Args;
             this.m_AppPanel.ApplicationWorkingDirectory = this.m_puttyStartInfo.WorkingDir;
             this.m_AppPanel.Location = new System.Drawing.Point(0, 0);
-            this.m_AppPanel.Name = this.m_Session.GetFullPathToString();
+            this.m_AppPanel.Name = this.m_Session.GetNamesString();
             this.m_AppPanel.Size = new System.Drawing.Size(this.Width, this.Height);
             this.m_AppPanel.TabIndex = 0;            
             this.m_AppPanel.m_CloseCallback = this.m_ApplicationExit;
@@ -311,19 +311,9 @@ namespace SuperPutty
         {
             string str = String.Format("{0}?SessionId={1}&TabName={2}", 
                 this.GetType().FullName,
-                HttpUtility.UrlEncodeUnicode(this.m_Session.GetIdString()),
+                HttpUtility.UrlEncodeUnicode(this.m_Session.GetNamesString()),
                 HttpUtility.UrlEncodeUnicode(this.TextOverride));
             return str;
-        }
-
-        private static SessionLeaf FindBestSession(string sessionId)
-        {
-            // Warning: It is possible that a really short legacy id might be a new id but highly unlikely.
-            if (SessionData.IsStringIdValid(sessionId))
-                return SuperPuTTY.Sessions.GetByStringId(sessionId);
-
-            // Warning: No validity check on sessionId for legacy.
-            return SuperPuTTY.Sessions.GetByLegacyId(sessionId);
         }
 
         public static ctlPuttyPanel FromPersistString(String persistString)
@@ -340,7 +330,7 @@ namespace SuperPutty
 
                     Log.InfoFormat("Restoring putty session, sessionId={0}, tabName={1}", sessionId, tabName);
 
-                    SessionLeaf session = FindBestSession(sessionId);
+                    SessionLeaf session = SuperPuTTY.Sessions.GetByNamesString<SessionLeaf>(sessionId);
 
                     if (session != null)
                     {
@@ -369,7 +359,7 @@ namespace SuperPutty
                     {
                         string sessionId = persistString.Substring(idx + 1);
                         Log.InfoFormat("Restoring putty session, sessionId={0}", sessionId);
-                        SessionLeaf session = FindBestSession(sessionId);
+                        SessionLeaf session = SuperPuTTY.Sessions.GetByNamesString<SessionLeaf>(sessionId);
 
                         if (session != null)
                         {
@@ -400,7 +390,7 @@ namespace SuperPutty
         {
             dlgRenameItem dialog = new dlgRenameItem();
             dialog.ItemName = this.Text;
-            dialog.DetailName = this.m_Session.GetFullPathToString();
+            dialog.DetailName = this.m_Session.GetNamesString();
 
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {

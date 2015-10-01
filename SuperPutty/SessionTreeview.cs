@@ -860,16 +860,16 @@ namespace SuperPutty
         public class FolderTreeNode : DataTreeNode
         {
             public new SessionNode Session { get { return (SessionNode)this._Session; } protected set { this._Session = value; } }
-            private List<DataTreeNode> Unsorted = new List<DataTreeNode>();
+            private Dictionary<string, DataTreeNode> Unsorted = new Dictionary<string, DataTreeNode>();
 
             public FolderTreeNode(SessionNode session, TreeNodeFactory factory, ContextMenuStrip menu, SearchFilter filter)
                 : base(session, factory, menu, filter)
             {
-                this.ToolTipText = String.Format("Id: {0}\nPath: {1}", session.Id, session.GetFullPathToString());
+                this.ToolTipText = String.Format("Path: {0}", session.GetNamesString());
                 this.ImageKey = SessionTreeview.ImageKeyFolder;
                 this.SelectedImageKey = SessionTreeview.ImageKeyFolder;
                 this.Update(filter);
-                session.OnChange(new ListChangedEventHandler(Sessions_ListChanged));
+                session.OnChange(new ChangedEventHandler(Sessions_ListChanged));
             }
 
             protected new void Update(SearchFilter filter)
@@ -884,7 +884,7 @@ namespace SuperPutty
                     if (node.Show)
                         this.Nodes.Add(node);
 
-                    this.Unsorted.Add(node);
+                    this.Unsorted.Add(child.Name, node);
                 }
 
                 this.Show = this.Show || this.Nodes.Count > 0;
@@ -892,7 +892,7 @@ namespace SuperPutty
 
             ~FolderTreeNode()
             {
-                this.Session.OffChange(new ListChangedEventHandler(Sessions_ListChanged));
+                this.Session.OffChange(new ChangedEventHandler(Sessions_ListChanged));
             }
 
             public List<T> FlattenTags<T>() where T : SessionData
@@ -913,24 +913,23 @@ namespace SuperPutty
                 return children;
             }
 
-            protected void Sessions_ListChanged(object sender, ListChangedEventArgs e)
+            protected void Sessions_ListChanged(ChangedEventArgs e)
             {
-                BindingList<SessionData> sessions = (BindingList<SessionData>)sender;
                 DataTreeNode node;
 
-                switch (e.ListChangedType)
+                switch (e.Type)
                 {
-                    case ListChangedType.ItemAdded:
-                        node = this.Factory.create(sessions[e.NewIndex]);
+                    case ChangeType.Added:
+                        node = this.Factory.create(e.Item);
 
                         if (node.Show)
                             this.Nodes.Add(node);
 
-                        this.Unsorted.Add(node);
+                        this.Unsorted.Add(e.Item.Name, node);
                         break;
-                    case ListChangedType.ItemDeleted:
-                        node = this.Unsorted[e.NewIndex];
-                        this.Unsorted.RemoveAt(e.NewIndex);
+                    case ChangeType.Removed:
+                        node = this.Unsorted[e.Item.Name];
+                        this.Unsorted.Remove(e.Item.Name);
 
                         if (node.Show)
                             node.Remove();
@@ -958,9 +957,9 @@ namespace SuperPutty
             private void OnLoaded(object sender, EventArgs e)
             {
                 this.TreeView.BeginUpdate();
-                this.Session.OffChange(new ListChangedEventHandler(this.Sessions_ListChanged));
+                this.Session.OffChange(new ChangedEventHandler(this.Sessions_ListChanged));
                 base.Update(this.Factory.filter);
-                this.Session.OnChange(new ListChangedEventHandler(this.Sessions_ListChanged));
+                this.Session.OnChange(new ChangedEventHandler(this.Sessions_ListChanged));
                 this.TreeView.EndUpdate();
             }
         }
